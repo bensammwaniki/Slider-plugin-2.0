@@ -470,9 +470,6 @@ class Modal_Widget extends Widget_Base {
             ]
         );
 
-        /* =========================
-        Image Style Controls
-        ========================= */
         $this->end_controls_section();
     }
 
