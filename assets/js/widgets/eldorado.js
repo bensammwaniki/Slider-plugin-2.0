@@ -293,25 +293,41 @@
             $carousel.on("mouseenter.dsEldoradoHover", function () {
               if (!swiper || !swiper.autoplay) return;
 
-              if (typeof swiper.autoplay.pause === "function") {
-                swiper.autoplay.pause();
-                return;
-              }
-
-              if (typeof swiper.autoplay.stop === "function") {
-                swiper.autoplay.stop();
+              if (settings.smoothScroll) {
+                if (typeof swiper.autoplay.stop === "function") {
+                  swiper.autoplay.stop();
+                }
+                if (typeof swiper.getTranslate === "function" && typeof swiper.setTranslate === "function") {
+                  swiper.setTranslate(swiper.getTranslate());
+                  if (typeof swiper.setTransition === "function") {
+                    swiper.setTransition(0);
+                  }
+                }
+              } else {
+                if (typeof swiper.autoplay.pause === "function") {
+                  swiper.autoplay.pause();
+                  return;
+                }
+                if (typeof swiper.autoplay.stop === "function") {
+                  swiper.autoplay.stop();
+                }
               }
             });
             $carousel.on("mouseleave.dsEldoradoHover", function () {
               if (!swiper || !swiper.autoplay) return;
 
-              if (typeof swiper.autoplay.resume === "function") {
-                swiper.autoplay.resume();
-                return;
-              }
-
-              if (typeof swiper.autoplay.start === "function") {
-                swiper.autoplay.start();
+              if (settings.smoothScroll) {
+                if (typeof swiper.autoplay.start === "function") {
+                  swiper.autoplay.start();
+                }
+              } else {
+                if (typeof swiper.autoplay.resume === "function") {
+                  swiper.autoplay.resume();
+                  return;
+                }
+                if (typeof swiper.autoplay.start === "function") {
+                  swiper.autoplay.start();
+                }
               }
             });
           }
