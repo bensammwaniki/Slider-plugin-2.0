@@ -57,7 +57,6 @@ class DailySliderPlugin {
         add_action( 'elementor/frontend/after_register_scripts', array( $this, 'register_assets' ) );
         add_action( 'elementor/frontend/after_register_styles', array( $this, 'register_assets' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ), 5 );
-        add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'enqueue_editor_assets' ) );
     }
 
     public function register_assets() {
@@ -97,20 +96,6 @@ class DailySliderPlugin {
         wp_register_script( 'skb-isotope', plugins_url( 'assets/js/widgets/gallery-isotope.pkgd.min.js', __FILE__ ), array( 'jquery', 'imagesloaded' ), $asset_version( 'assets/js/widgets/gallery-isotope.pkgd.min.js' ), true );
         wp_register_script( 'skb-hoverdir', plugins_url( 'assets/js/widgets/gallery-hoverdir.js', __FILE__ ), array( 'jquery', 'skb-modernizr' ), $asset_version( 'assets/js/widgets/gallery-hoverdir.js' ), true );
         wp_register_script( 'skb-venobox', plugins_url( 'assets/js/widgets/gallery-venobox.js', __FILE__ ), array( 'jquery' ), $asset_version( 'assets/js/widgets/gallery-venobox.js' ), true );
-    }
-
-    public function enqueue_editor_assets() {
-        $asset_version = file_exists( plugin_dir_path( __FILE__ ) . 'assets/js/widgets/modal-editor.js' ) 
-            ? (string) filemtime( plugin_dir_path( __FILE__ ) . 'assets/js/widgets/modal-editor.js' ) 
-            : self::VERSION;
-
-        wp_enqueue_script(
-            'DailySlider-modal-editor',
-            plugins_url( 'assets/js/widgets/modal-editor.js', __FILE__ ),
-            [ 'elementor-editor' ],
-            $asset_version,
-            true
-        );
     }
 
 
