@@ -251,6 +251,18 @@ class Pixel_Widget extends Widget_Base {
                 ],
             ]
         );
+
+        $repeater->add_control(
+            'slide_video_poster',
+            [
+                'label' => __('Video Display Image', 'daily-slider'),
+                'type' => Controls_Manager::MEDIA,
+                'condition' => [
+                    'slide_media_type' => 'video',
+                ],
+            ]
+        );
+    
     
         $this->add_control(
             'swiper_slides',
@@ -1700,6 +1712,14 @@ $this->end_controls_section();// Close sub_title_style_section
                                     $video_url = $slide['slide_video']['url'];
                                 }
                             }
+                            $poster_url = '';
+                            if (!empty($slide['slide_video_poster']) && is_array($slide['slide_video_poster'])) {
+                                if (!empty($slide['slide_video_poster']['id'])) {
+                                    $poster_url = wp_get_attachment_url((int) $slide['slide_video_poster']['id']);
+                                } elseif (!empty($slide['slide_video_poster']['url'])) {
+                                    $poster_url = $slide['slide_video_poster']['url'];
+                                }
+                            }
                             ?>
                             <?php if ($slide_media_type === 'video' && !empty($video_url)) : ?>
                                 <video
@@ -1709,6 +1729,9 @@ $this->end_controls_section();// Close sub_title_style_section
                                     loop
                                     playsinline
                                     preload="metadata"
+                                    <?php if (!empty($poster_url)) : ?>
+                                        poster="<?php echo esc_url($poster_url); ?>"
+                                    <?php endif; ?>
                                 >
                                     <source src="<?php echo esc_url($video_url); ?>">
                                 </video>
