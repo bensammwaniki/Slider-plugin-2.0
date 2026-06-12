@@ -100,6 +100,7 @@
   max-width: 1200px;
   margin: 0 auto;
   pointer-events: none;
+  padding: 0 clamp(40px, 8vw, 100px); /* Add safe gutters on the sides for arrows */
 }
 
 .daily-content-inner.layout-full {
@@ -182,10 +183,11 @@
   justify-content: space-between;
   z-index: 5;
   top: 50%;
-  left: 50%;
-  right: auto;
-  width: min(calc(100% - (var(--daily-pixel-spacing) * 2)), 1200px);
-  transform: translate(-50%, -50%);
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 0 var(--daily-pixel-spacing);
+  transform: translateY(-50%);
   pointer-events: none;
 }
 
@@ -193,11 +195,13 @@
   cursor: pointer;
   padding: clamp(10px, 3vw, 12px);
   border-radius: 50%;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+  background: rgba(255, 255, 255, 0.12); /* default background for contrast */
+  color: #fff; /* default arrow color */
 }
 
 .daily-nav-button svg {
@@ -208,6 +212,8 @@
 
 .daily-nav-button:hover {
   transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 /* =========================================

@@ -1528,11 +1528,6 @@ $this->end_controls_section();// Close sub_title_style_section
             $device_key = $map[$device] ?? $key;
 
             if (array_key_exists($device_key, $settings)) {
-                // Elementor may store empty responsive values as ''.
-                // Treat empty as "not explicitly set" so device inherits from desktop.
-                if ($settings[$device_key] === '' || $settings[$device_key] === null) {
-                    return null;
-                }
                 return !empty($settings[$device_key]) && $settings[$device_key] === 'yes';
             }
 
