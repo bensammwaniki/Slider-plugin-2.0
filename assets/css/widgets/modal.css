@@ -151,19 +151,27 @@ body.daily-modal-open {
   }
 }
 
-/* Elementor template support inside modal */
-.daily-modal-template-content {
+/* Elementor nested container support inside modal */
+.daily-modal-nested-container {
   width: 100%;
+  min-height: 100px;
 }
 
-.daily-modal-no-template {
-  padding: 30px;
-  text-align: center;
-  background: #f8f9fa;
-  border: 2px dashed #ddd;
-  border-radius: 8px;
+/* In the editor preview, ensure the nested container has a visual outline if it's empty so it's easy to drag widgets in */
+.elementor-editor-active .daily-modal-nested-container:empty {
+  min-height: 150px;
+  border: 2px dashed #a0a5aa;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f7f7f7;
+}
+
+.elementor-editor-active .daily-modal-nested-container:empty::before {
+  content: 'Drag widgets here into the modal body';
   color: #72777c;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-  font-size: 15px;
+  font-size: 14px;
 }
 
