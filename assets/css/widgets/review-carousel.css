@@ -1,80 +1,145 @@
 /* ====================================================================
-   Review Carousel — Dark Glassmorphism Card Redesign
-   Matches the WEB.SI reference design: dark cards, emoji badge,
-   name + stars + body text + role/company footer layout.
+   Review Carousel — Glassmorphism Cards + Marquee / Swiper Modes
    ==================================================================== */
 
+/* ── Marquee keyframes ──────────────────────────────────────────── */
+@keyframes ds-marquee-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes ds-marquee-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* ================================================================
+   SHARED: card tokens & base styles (both Swiper and Marquee)
+   ================================================================ */
 .ds-review-carousel {
   position: relative;
-  --navigation-horizontal-spacing: -80px;
-  --pagination-vertical-spacing: 60px;
+  --navigation-horizontal-spacing: -64px;
+  --pagination-vertical-spacing: 56px;
 
-  /* ── Swiper wrapper ─────────────────────────────────────────────── */
-  .daily-review-carousel-wrap {
-    position: relative;
-  }
-
-  /* ── Card ───────────────────────────────────────────────────────── */
+  /* ── Glassmorphism card ─────────────────────────────────────────── */
   .daily-slide-item {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
     padding: 22px 22px 18px;
     display: flex;
     flex-direction: column;
     gap: 0;
     height: auto;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     position: relative;
-    transition: border-color 0.3s ease, transform 0.3s ease;
     overflow: hidden;
 
-    &:hover {
-      border-color: rgba(255, 255, 255, 0.22);
-      transform: translateY(-3px);
-    }
-
-    /* subtle glow top-left */
+    /* subtle inner glow */
     &::before {
       content: "";
       position: absolute;
-      top: -40px;
-      left: -40px;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
       pointer-events: none;
+    }
+
+    &:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.28);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
     }
   }
 
-  /* ── Card header: name + emoji badge ───────────────────────────── */
-  .daily-card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    gap: 10px;
-  }
-
-  /* ── Avatar + name/role row ─────────────────────────────────────── */
-  .daily-img-content-wrap {
+  /* ── Top row: stars + Google G ──────────────────────────────────── */
+  .daily-card-top {
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
+    justify-content: space-between;
+    margin-bottom: 14px;
   }
 
+  /* ── Star rating ────────────────────────────────────────────────── */
+  .daily-review-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    line-height: 1;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+      fill: #f5a623;
+      color: #f5a623;
+    }
+  }
+
+  /* ── Google G badge ─────────────────────────────────────────────── */
+  .daily-google-badge {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+      width: 28px;
+      height: 28px;
+      display: block;
+    }
+  }
+
+  /* ── Review headline ────────────────────────────────────────────── */
+  .daily-review-headline {
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 0 8px;
+    line-height: 1.35;
+  }
+
+  /* ── Review body text ───────────────────────────────────────────── */
+  .daily-review-content {
+    flex: 1;
+    margin-bottom: 16px;
+  }
+
+  .daily-text {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.62);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    line-clamp: 4; /* standard property — required alongside the prefixed version */
+    overflow: hidden;
+  }
+
+  /* ── Footer: avatar + name + date ──────────────────────────────── */
+  .daily-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    margin-top: auto;
+  }
+
+  /* ── Avatar circle ──────────────────────────────────────────────── */
   .daily-image-wrap {
     flex-shrink: 0;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.15);
     overflow: hidden;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.18);
+    padding: 0;
 
     .daily-avatar {
       display: block;
@@ -85,126 +150,66 @@
     }
   }
 
-  /* Initials circle fallback when no avatar image exists */
+  /* Initials fallback */
   .daily-avatar-initials {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
-    color: rgba(255,255,255,0.85);
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.08));
     border-radius: 50%;
     user-select: none;
   }
 
-  /* ── Emoji reaction badge (top-right) ───────────────────────────── */
-  .daily-emoji-badge {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.10);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+  /* ── Name + date ────────────────────────────────────────────────── */
+  .daily-avatar-info {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    line-height: 1;
-    transition: transform 0.25s ease;
-
-    &:hover {
-      transform: scale(1.15);
-    }
-  }
-
-  /* ── Name ───────────────────────────────────────────────────────── */
-  .daily-avatar-content {
+    flex-direction: column;
+    gap: 2px;
     min-width: 0;
   }
 
   .daily-avatar-name {
-    margin: 0 0 2px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #ffffff;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.90);
+    display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.3;
-  }
-
-  /* ── Stars ──────────────────────────────────────────────────────── */
-  .daily-review-rating {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    margin: 10px 0 12px;
-    line-height: 1;
-
-    svg {
-      width: 16px;
-      height: 16px;
-      fill: #f5a623;
-      color: #f5a623;
-      display: block;
-      stroke: none;
-    }
-  }
-
-  /* ── Review text ────────────────────────────────────────────────── */
-  .daily-review-content {
-    flex: 1;
-  }
-
-  .daily-text {
-    font-size: 13px;
-    line-height: 1.65;
-    margin: 0 0 16px;
-    color: rgba(255, 255, 255, 0.65);
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* ── Footer: role + company ─────────────────────────────────────── */
-  .daily-card-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 12px;
-    margin-top: auto;
+    line-height: 1.4;
   }
 
   .daily-avatar-dagination {
     display: block;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11.5px;
     color: rgba(255, 255, 255, 0.45);
-    line-height: 1.4;
+    font-weight: 400;
     text-transform: none;
-    letter-spacing: 0.01em;
-
-    strong {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.75);
-      margin-bottom: 1px;
-    }
+    letter-spacing: 0;
+    line-height: 1.4;
   }
+}
 
-  /* ── Navigation arrows ──────────────────────────────────────────── */
-  .daily-nav-button-wrap {
-    position: static;
-  }
 
+/* ================================================================
+   CAROUSEL (Swiper) mode — navigation + pagination
+   ================================================================ */
+.ds-review-carousel:not(.ds-marquee-mode) {
+
+  .daily-review-carousel-wrap { position: relative; }
+
+  /* Nav arrows */
   .daily-nav-button {
     position: absolute;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20);
     padding: clamp(10px, 2vw, 13px);
     display: flex;
     align-items: center;
@@ -214,97 +219,166 @@
     z-index: 99;
     top: 50%;
     transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255,255,255,0.80);
 
-    &.daily-button-prev {
-      left: 10px;
-    }
-    &.daily-button-next {
-      right: 10px;
-    }
+    &.daily-button-prev { left: 10px; }
+    &.daily-button-next { right: 10px; }
+
     &::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      background: var(--daily-brand-color, rgba(255,255,255,0.15));
-      width: 100%;
-      height: 100%;
+      inset: 0;
+      background: rgba(255,255,255,0.18);
       border-radius: inherit;
       transform: scale(0);
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease;
     }
+
     svg {
       width: clamp(16px, 3vw, 20px);
       height: clamp(16px, 3vw, 20px);
       display: block;
-      color: currentColor;
-      z-index: 99;
       position: relative;
+      z-index: 1;
     }
+
     &:hover {
       color: #fff;
-      background: rgba(255,255,255,0.14);
-      border-color: rgba(255,255,255,0.35);
+      border-color: rgba(255,255,255,0.45);
       transform: scale(1.08) translateY(-50%);
-      &::before {
-        transform: scale(1);
-      }
+      &::before { transform: scale(1); }
     }
   }
 
-  /* ── Pagination dots ────────────────────────────────────────────── */
-  .daily-pagination {
-    &.swiper-pagination {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transform: translateY(var(--pagination-vertical-spacing));
-      justify-content: center;
+  /* Pagination */
+  .daily-pagination.swiper-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(var(--pagination-vertical-spacing));
+    justify-content: center;
 
-      .swiper-pagination-bullet {
-        margin: 0;
-        width: 8px;
+    .swiper-pagination-bullet {
+      margin: 0;
+      width: 8px;
+      height: 8px;
+      border: 1.5px solid rgba(255,255,255,0.40);
+      opacity: 1;
+      background: transparent;
+      transition: all 0.3s;
+      border-radius: 50%;
+
+      &.swiper-pagination-bullet-active {
+        background: rgba(255,255,255,0.80);
+        border-color: transparent;
+        width: 24px;
+        border-radius: 4px;
         height: 8px;
-        border: 1px solid rgba(255,255,255,0.4);
-        opacity: 1;
-        background: transparent;
-        transition: all 0.3s;
-        border-radius: 50%;
-
-        &.swiper-pagination-bullet-active {
-          background: rgba(255,255,255,0.75);
-          border-color: transparent;
-          width: 22px;
-          height: 8px;
-          border-radius: 4px;
-        }
       }
     }
   }
 
-  /* ── Content alignment overrides ───────────────────────────────── */
+  /* Alignment */
   .daily-content-left  { text-align: left; }
   .daily-content-center {
     text-align: center;
-    .daily-img-content-wrap { justify-content: center; }
-    .daily-card-header       { flex-direction: column; align-items: center; }
+    .daily-card-footer { justify-content: center; }
   }
   .daily-content-right {
     text-align: right;
-    .daily-img-content-wrap { flex-direction: row-reverse; }
+    .daily-card-footer { flex-direction: row-reverse; }
   }
 
-  /* ── Direction: avatar on top ───────────────────────────────────── */
+  /* Direction */
   .daily-avatar-top .daily-slide-item { flex-direction: column; }
 }
 
-/* ── Desktop nav offset ─────────────────────────────────────────── */
+/* Desktop nav offset */
 @media (min-width: 1024px) {
-  .ds-review-carousel {
+  .ds-review-carousel:not(.ds-marquee-mode) {
     .daily-nav-button {
       &.daily-button-prev { left: var(--navigation-horizontal-spacing); }
       &.daily-button-next { right: var(--navigation-horizontal-spacing); }
     }
+  }
+}
+
+
+/* ================================================================
+   MARQUEE (Infinite Scroll) mode
+   ================================================================ */
+.ds-review-carousel.ds-marquee-mode {
+  --marquee-speed:    35s;
+  --marquee-gap:      24px;
+  --marquee-card-w:   320px;
+  --marquee-row-gap:  18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--marquee-row-gap);
+  overflow: hidden;
+
+  /* Each row clips its track */
+  .ds-marquee-row {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+
+    /* Fade edges */
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: clamp(40px, 8vw, 120px);
+      z-index: 2;
+      pointer-events: none;
+    }
+    &::before {
+      left: 0;
+      background: linear-gradient(to right, var(--ds-fade-color, rgba(0,0,0,0.8)), transparent);
+    }
+    &::after {
+      right: 0;
+      background: linear-gradient(to left, var(--ds-fade-color, rgba(0,0,0,0.8)), transparent);
+    }
+  }
+
+  /* The scrolling track — contains 4× slides for seamless loop */
+  .ds-marquee-track {
+    display: flex;
+    align-items: stretch;
+    gap: var(--marquee-gap);
+    width: max-content;
+    will-change: transform;
+
+    /* Default: scroll left */
+    animation: ds-marquee-left var(--marquee-speed) linear infinite;
+  }
+
+  /* One complete copy of slides inside the track */
+  .ds-marquee-copy {
+    display: flex;
+    align-items: stretch;
+    gap: var(--marquee-gap);
+    flex-shrink: 0;
+  }
+
+  /* Reverse row */
+  .ds-marquee-row[data-direction="right"] .ds-marquee-track {
+    animation: ds-marquee-right var(--marquee-speed) linear infinite;
+  }
+
+  /* Cards in marquee have fixed width */
+  .daily-slide-item {
+    width: var(--marquee-card-w);
+    flex-shrink: 0;
+    cursor: default;
+  }
+
+  /* Pause on hover (applied to each row's track independently) */
+  &.ds-pause-on-hover .ds-marquee-track:hover {
+    animation-play-state: paused;
   }
 }
