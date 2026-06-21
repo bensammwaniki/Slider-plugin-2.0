@@ -1346,7 +1346,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 return;
             }
 
-            $slides_data = DailySlider_Google_Reviews_Bridge::get_reviews(
+            $slides_data = \DailySlider_Google_Reviews_Bridge::get_reviews(
                 $place_id,
                 $api_key,
                 $limit,
