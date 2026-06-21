@@ -1438,68 +1438,107 @@ class ReviewCarousel_Widget extends Widget_Base {
 
                 <div class="swiper-wrapper">
                     <?php if ( ! empty( $slides_data ) && is_array( $slides_data ) ) : ?>
-                        <?php foreach ( $slides_data as $slide ) : ?>
+                        <?php
+                        // Pre-compute emoji pool — cycles through cards
+                        $emoji_pool = [ '😍', '❤️', '😊', '🤩', '👏', '🙌', '💯', '⭐' ];
+                        $slide_index = 0;
+                        ?>
+                        <?php foreach ( $slides_data as $slide ) :
+                            $emoji = $emoji_pool[ $slide_index % count( $emoji_pool ) ];
+                            $slide_index++;
+                        ?>
                             <div class="swiper-slide daily-slide-item">
 
-                                <div class="daily-img-content-wrap">
-                                    <?php if (!empty($settings['show_avatar_image'])) : ?>
-                                        <div class="daily-image-wrap">
-                                            <?php if (!empty($slide['avatar_image']['id'])) : ?>
-                                                <?php
-                                                // Use wp_get_attachment_image() to output the image with proper attributes
-                                                echo wp_get_attachment_image(
-                                                    $slide['avatar_image']['id'], 
-                                                    'full', 
-                                                    false, 
-                                                    [
-                                                        'class' => 'daily-avatar',
-                                                        'alt'   => esc_attr($slide['name'] ?? __('Avatar', 'daily-slider')), // Fallback to 'Avatar' if name is unavailable
-                                                    ]
-                                                );
-                                                ?>
-                                            <?php else : ?>
-                                                <!-- Fallback image if no avatar image ID is set -->
-                                                <img 
-                                                    class="daily-avatar" 
-                                                    src="<?php echo esc_url($slide['avatar_image']['url']); ?>" 
-                                                    alt="<?php echo esc_attr($slide['name'] ?? __('Avatar', 'daily-slider')); ?>" 
-                                                />
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="daily-avatar-content">
-                                        <?php if (!empty($settings['show_name']) && !empty($slide['name'])) : ?>
-                                        <!-- Render the title without the dynamic tag -->
-                                        <h3 class="daily-avatar-name">
-                                            <?php echo esc_html($slide['name']); ?>
-                                        </h3>
+                                <!-- ── Card header: avatar + name (left) | emoji badge (right) ── -->
+                                <div class="daily-card-header">
+                                    <div class="daily-img-content-wrap">
+                                        <?php if ( ! empty( $settings['show_avatar_image'] ) ) : ?>
+                                            <div class="daily-image-wrap">
+                                                <?php if ( ! empty( $slide['avatar_image']['id'] ) ) : ?>
+                                                    <?php echo wp_get_attachment_image(
+                                                        $slide['avatar_image']['id'],
+                                                        'thumbnail',
+                                                        false,
+                                                        [
+                                                            'class' => 'daily-avatar',
+                                                            'alt'   => esc_attr( $slide['name'] ?? __( 'Avatar', 'daily-slider' ) ),
+                                                        ]
+                                                    ); ?>
+                                                <?php elseif ( ! empty( $slide['avatar_image']['url'] ) ) : ?>
+                                                    <img
+                                                        class="daily-avatar"
+                                                        src="<?php echo esc_url( $slide['avatar_image']['url'] ); ?>"
+                                                        alt="<?php echo esc_attr( $slide['name'] ?? __( 'Avatar', 'daily-slider' ) ); ?>"
+                                                        loading="lazy"
+                                                    />
+                                                <?php else : ?>
+                                                    <!-- Initials fallback when no avatar image is available -->
+                                                    <div class="daily-avatar-initials" aria-hidden="true">
+                                                        <?php
+                                                        $initials = '';
+                                                        if ( ! empty( $slide['name'] ) ) {
+                                                            $parts = explode( ' ', trim( $slide['name'] ) );
+                                                            $initials = strtoupper( substr( $parts[0], 0, 1 ) );
+                                                            if ( isset( $parts[1] ) ) {
+                                                                $initials .= strtoupper( substr( $parts[1], 0, 1 ) );
+                                                            }
+                                                        }
+                                                        echo esc_html( $initials ?: '?' );
+                                                        ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         <?php endif; ?>
 
-                                        <?php if (!empty($settings['show_dagination']) && !empty($slide['dagination'])) : ?>
-                                        <span class="daily-avatar-dagination">
-                                            <?php echo esc_html($slide['dagination']); ?>
-                                        </span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                
-                                <div class="daily-review-content">
-                                <?php if (!empty($settings['show_star_rating'])) : ?>
+                                        <div class="daily-avatar-content">
+                                            <?php if ( ! empty( $settings['show_name'] ) && ! empty( $slide['name'] ) ) : ?>
+                                                <h3 class="daily-avatar-name"><?php echo esc_html( $slide['name'] ); ?></h3>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div><!-- /.daily-img-content-wrap -->
+
+                                    <!-- Emoji reaction badge -->
+                                    <div class="daily-emoji-badge" aria-hidden="true"><?php echo $emoji; ?></div>
+                                </div><!-- /.daily-card-header -->
+
+                                <!-- ── Stars ─────────────────────────────────────────────────── -->
+                                <?php if ( ! empty( $settings['show_star_rating'] ) ) : ?>
                                     <div class="daily-review-rating">
-                                        <?php for ($i = 0; $i < intval($slide['rating']['size']); $i++) : ?>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-star">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path d="M12 3l2.597 6.385h6.403l-5.14 4.717 1.932 6.093-5.192 -4.192-5.192 4.192 1.932 -6.093-5.14 -4.717h6.403z" />
+                                        <?php
+                                        $rating     = (int) ( $slide['rating']['size'] ?? 5 );
+                                        $max_stars  = 5;
+                                        for ( $i = 0; $i < $max_stars; $i++ ) :
+                                            // Filled star for earned rating, outline for remaining
+                                            if ( $i < $rating ) :
+                                        ?>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                             </svg>
-                                        <?php endfor; ?>
+                                        <?php else : ?>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                            </svg>
+                                        <?php endif; endfor; ?>
                                     </div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($settings['show_text']) && !empty($slide['text'])) : ?>
-                                        <p class="daily-text"><?php echo esc_html($slide['text']); ?></p>
-                                    <?php endif; ?>
-                                </div>
-                                
-                            </div>
+                                <?php endif; ?>
+
+                                <!-- ── Review body text ──────────────────────────────────────── -->
+                                <?php if ( ! empty( $settings['show_text'] ) && ! empty( $slide['text'] ) ) : ?>
+                                    <div class="daily-review-content">
+                                        <p class="daily-text"><?php echo esc_html( $slide['text'] ); ?></p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- ── Footer: role / company ──────────────────────────────── -->
+                                <?php if ( ! empty( $settings['show_dagination'] ) && ! empty( $slide['dagination'] ) ) : ?>
+                                    <div class="daily-card-footer">
+                                        <span class="daily-avatar-dagination">
+                                            <?php echo esc_html( $slide['dagination'] ); ?>
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+
+                            </div><!-- /.daily-slide-item -->
                         <?php endforeach; ?>
                     <?php endif; // end slides_data loop ?>
                 </div>
