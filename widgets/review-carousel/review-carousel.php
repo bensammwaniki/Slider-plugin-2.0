@@ -37,6 +37,96 @@ class ReviewCarousel_Widget extends Widget_Base {
 
     protected function register_controls() {
 
+        // ── Google Reviews Source Section ────────────────────────────────────────
+        $this->start_controls_section(
+            'google_reviews_section',
+            [
+                'label' => __( 'Google Reviews Source', 'daily-slider' ),
+                'tab'   => Controls_Manager::TAB_CONTENT,
+            ]
+        );
+
+        $this->add_control(
+            'data_source',
+            [
+                'label'   => __( 'Data Source', 'daily-slider' ),
+                'type'    => Controls_Manager::SELECT,
+                'default' => 'static',
+                'options' => [
+                    'static' => __( '✏️ Static (Repeater)', 'daily-slider' ),
+                    'google' => __( '🌐 Google Reviews (Live)', 'daily-slider' ),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'google_api_key',
+            [
+                'label'       => __( 'Google Places API Key', 'daily-slider' ),
+                'type'        => Controls_Manager::TEXT,
+                'input_type'  => 'password',
+                'placeholder' => 'AIza...',
+                'description' => __( 'Create a key at console.cloud.google.com → APIs → Places API.', 'daily-slider' ),
+                'label_block' => true,
+                'condition'   => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_place_id',
+            [
+                'label'       => __( 'Google Place ID', 'daily-slider' ),
+                'type'        => Controls_Manager::TEXT,
+                'placeholder' => 'ChIJN1t_tDeuEmsRUsoyG83frY4',
+                'description' => __( 'Find your Place ID at: developers.google.com/maps/documentation/places/web-service/place-id', 'daily-slider' ),
+                'label_block' => true,
+                'condition'   => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_limit',
+            [
+                'label'     => __( 'Number of Reviews', 'daily-slider' ),
+                'type'      => Controls_Manager::NUMBER,
+                'default'   => 5,
+                'min'       => 1,
+                'max'       => 5,
+                'step'      => 1,
+                'description' => __( 'Google Places API returns up to 5 reviews.', 'daily-slider' ),
+                'condition' => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_min_rating',
+            [
+                'label'     => __( 'Minimum Star Rating', 'daily-slider' ),
+                'type'      => Controls_Manager::NUMBER,
+                'default'   => 4,
+                'min'       => 1,
+                'max'       => 5,
+                'step'      => 1,
+                'description' => __( 'Only show reviews with this rating or higher (1–5 ★).', 'daily-slider' ),
+                'condition' => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_cache_notice',
+            [
+                'type'            => Controls_Manager::RAW_HTML,
+                'raw'             => '<div style="background:#f0f6ff;border-left:3px solid #4A90E2;padding:8px 10px;font-size:12px;line-height:1.5;">'.
+                                     '<strong>⏱ Cache:</strong> Reviews are cached for <strong>6 hours</strong> to avoid unnecessary API calls. '.
+                                     'Re-save the page to force a refresh if the transient has expired.</div>',
+                'content_classes' => 'elementor-descriptor',
+                'condition'       => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->end_controls_section();
+        // ── End Google Reviews Source Section ────────────────────────────────────
+
         // Genarel
         $this->start_controls_section(
             'genarel_section',
@@ -1239,6 +1329,48 @@ class ReviewCarousel_Widget extends Widget_Base {
         $settings = $this->get_settings_for_display();
         $id = 'ds-' . $this->get_id();
 
+        // ── Determine slide data source ──────────────────────────────────────────
+        $data_source = $settings['data_source'] ?? 'static';
+
+        if ( 'google' === $data_source ) {
+            $api_key    = trim( $settings['google_api_key'] ?? '' );
+            $place_id   = trim( $settings['google_place_id'] ?? '' );
+            $limit      = (int) ( $settings['google_limit'] ?? 5 );
+            $min_rating = (int) ( $settings['google_min_rating'] ?? 4 );
+
+            if ( empty( $api_key ) || empty( $place_id ) ) {
+                if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+                    echo '<div style="padding:20px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:13px;">'.
+                         '<strong>⚠️ Google Reviews:</strong> Please enter your <em>API Key</em> and <em>Place ID</em> in the widget settings to load reviews.</div>';
+                }
+                return;
+            }
+
+            $slides_data = DailySlider_Google_Reviews_Bridge::get_reviews(
+                $place_id,
+                $api_key,
+                $limit,
+                $min_rating
+            );
+
+            if ( empty( $slides_data ) ) {
+                if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+                    echo '<div style="padding:20px;background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;font-size:13px;">'.
+                         '<strong>⚠️ Google Reviews:</strong> No reviews found matching your filters (min rating: ' . (int) $min_rating . '★). '.
+                         'Check your API Key, Place ID, and make sure the Places API is enabled.</div>';
+                }
+                return;
+            }
+        } else {
+            // Static repeater mode — original behaviour.
+            $slides_data = $settings['swiper_slides'] ?? [];
+
+            if ( empty( $slides_data ) ) {
+                return;
+            }
+        }
+        // ── End data source resolution ───────────────────────────────────────────
+
         $elementor_vp_lg = get_option( 'elementor_viewport_lg' );
 		$elementor_vp_md = get_option( 'elementor_viewport_md' );
 		$viewport_lg     = ! empty( $elementor_vp_lg ) ? $elementor_vp_lg - 1 : 1023;
@@ -1305,8 +1437,8 @@ class ReviewCarousel_Widget extends Widget_Base {
            <?php echo esc_attr($settings['content_align'] . ' ' . $settings['item_direction']); ?>">
 
                 <div class="swiper-wrapper">
-                    <?php if (!empty($settings['swiper_slides']) && is_array($settings['swiper_slides'])) : ?>
-                        <?php foreach ($settings['swiper_slides'] as $slide) : ?>
+                    <?php if ( ! empty( $slides_data ) && is_array( $slides_data ) ) : ?>
+                        <?php foreach ( $slides_data as $slide ) : ?>
                             <div class="swiper-slide daily-slide-item">
 
                                 <div class="daily-img-content-wrap">
@@ -1369,7 +1501,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                                 
                             </div>
                         <?php endforeach; ?>
-                    <?php endif; ?>
+                    <?php endif; // end slides_data loop ?>
                 </div>
             </div>
 
