@@ -116,6 +116,10 @@
 
     $carousels.each(function () {
       var $carousel = $(this);
+
+      // Marquee mode is pure CSS — skip Swiper entirely.
+      if ($carousel.hasClass("ds-marquee-mode")) return;
+
       var $container = $carousel.find(".swiper").first();
       if (!$container.length) return;
 

@@ -51,6 +51,9 @@ class DailySliderPlugin {
             return;
         }
 
+        // Load the Google Reviews data bridge (always available, even outside Elementor).
+        require_once plugin_dir_path( __FILE__ ) . 'includes/class-google-reviews-bridge.php';
+
         add_action( 'elementor/elements/categories_registered', array( $this, 'add_elementor_category' ) );
         add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
         // Register assets for both Elementor editor preview and live frontend.

@@ -37,6 +37,96 @@ class ReviewCarousel_Widget extends Widget_Base {
 
     protected function register_controls() {
 
+        // ── Google Reviews Source Section ────────────────────────────────────────
+        $this->start_controls_section(
+            'google_reviews_section',
+            [
+                'label' => __( 'Google Reviews Source', 'daily-slider' ),
+                'tab'   => Controls_Manager::TAB_CONTENT,
+            ]
+        );
+
+        $this->add_control(
+            'data_source',
+            [
+                'label'   => __( 'Data Source', 'daily-slider' ),
+                'type'    => Controls_Manager::SELECT,
+                'default' => 'static',
+                'options' => [
+                    'static' => __( '✏️ Static (Repeater)', 'daily-slider' ),
+                    'google' => __( '🌐 Google Reviews (Live)', 'daily-slider' ),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'google_api_key',
+            [
+                'label'       => __( 'Google Places API Key', 'daily-slider' ),
+                'type'        => Controls_Manager::TEXT,
+                'input_type'  => 'password',
+                'placeholder' => 'AIza...',
+                'description' => __( 'Create a key at console.cloud.google.com → APIs → Places API.', 'daily-slider' ),
+                'label_block' => true,
+                'condition'   => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_place_id',
+            [
+                'label'       => __( 'Google Place ID', 'daily-slider' ),
+                'type'        => Controls_Manager::TEXT,
+                'placeholder' => 'ChIJN1t_tDeuEmsRUsoyG83frY4',
+                'description' => __( 'Find your Place ID at: developers.google.com/maps/documentation/places/web-service/place-id', 'daily-slider' ),
+                'label_block' => true,
+                'condition'   => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_limit',
+            [
+                'label'     => __( 'Number of Reviews', 'daily-slider' ),
+                'type'      => Controls_Manager::NUMBER,
+                'default'   => 5,
+                'min'       => 1,
+                'max'       => 5,
+                'step'      => 1,
+                'description' => __( 'Google Places API returns up to 5 reviews.', 'daily-slider' ),
+                'condition' => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_min_rating',
+            [
+                'label'     => __( 'Minimum Star Rating', 'daily-slider' ),
+                'type'      => Controls_Manager::NUMBER,
+                'default'   => 4,
+                'min'       => 1,
+                'max'       => 5,
+                'step'      => 1,
+                'description' => __( 'Only show reviews with this rating or higher (1–5 ★).', 'daily-slider' ),
+                'condition' => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
+            'google_cache_notice',
+            [
+                'type'            => Controls_Manager::RAW_HTML,
+                'raw'             => '<div style="background:#f0f6ff;border-left:3px solid #4A90E2;padding:8px 10px;font-size:12px;line-height:1.5;">'.
+                                     '<strong>⏱ Cache:</strong> Reviews are cached for <strong>6 hours</strong> to avoid unnecessary API calls. '.
+                                     'Re-save the page to force a refresh if the transient has expired.</div>',
+                'content_classes' => 'elementor-descriptor',
+                'condition'       => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->end_controls_section();
+        // ── End Google Reviews Source Section ────────────────────────────────────
+
         // Genarel
         $this->start_controls_section(
             'genarel_section',
@@ -424,7 +514,135 @@ class ReviewCarousel_Widget extends Widget_Base {
         );
     
         $this->end_controls_section(); // Close swiper_settings_section
-    
+
+        // ── Marquee (Infinite Scroll) Settings ──────────────────────────────────
+        $this->start_controls_section(
+            'marquee_settings_section',
+            [
+                'label' => __( '🔄 Marquee Settings', 'daily-slider' ),
+                'tab'   => Controls_Manager::TAB_CONTENT,
+            ]
+        );
+
+        $this->add_control(
+            'display_mode',
+            [
+                'label'   => __( 'Display Mode', 'daily-slider' ),
+                'type'    => Controls_Manager::SELECT,
+                'default' => 'carousel',
+                'options' => [
+                    'carousel' => __( '▶ Carousel (Swiper)', 'daily-slider' ),
+                    'marquee'  => __( '↔ Marquee (Infinite Scroll)', 'daily-slider' ),
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_rows',
+            [
+                'label'       => __( 'Number of Rows', 'daily-slider' ),
+                'type'        => Controls_Manager::NUMBER,
+                'default'     => 2,
+                'min'         => 1,
+                'max'         => 4,
+                'step'        => 1,
+                'description' => __( 'How many scrolling rows to show (1–4).', 'daily-slider' ),
+                'condition'   => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_direction',
+            [
+                'label'     => __( 'Row Direction', 'daily-slider' ),
+                'type'      => Controls_Manager::SELECT,
+                'default'   => 'alternate',
+                'options'   => [
+                    'alternate' => __( '↔ Alternate (odd=left, even=right)', 'daily-slider' ),
+                    'left'      => __( '← All scroll left', 'daily-slider' ),
+                    'right'     => __( '→ All scroll right', 'daily-slider' ),
+                ],
+                'condition' => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_speed',
+            [
+                'label'       => __( 'Scroll Speed (seconds)', 'daily-slider' ),
+                'type'        => Controls_Manager::NUMBER,
+                'default'     => 35,
+                'min'         => 5,
+                'max'         => 120,
+                'step'        => 5,
+                'description' => __( 'Lower = faster. Recommended: 25–45.', 'daily-slider' ),
+                'condition'   => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_pause_hover',
+            [
+                'label'       => __( 'Pause on Hover', 'daily-slider' ),
+                'type'        => Controls_Manager::SWITCHER,
+                'label_on'    => __( 'Yes', 'daily-slider' ),
+                'label_off'   => __( 'No', 'daily-slider' ),
+                'return_value' => 'yes',
+                'default'     => 'yes',
+                'condition'   => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_card_width',
+            [
+                'label'      => __( 'Card Width', 'daily-slider' ),
+                'type'       => Controls_Manager::SLIDER,
+                'size_units' => [ 'px' ],
+                'default'    => [ 'size' => 320 ],
+                'range'      => [ 'px' => [ 'min' => 200, 'max' => 600, 'step' => 10 ] ],
+                'condition'  => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_gap',
+            [
+                'label'      => __( 'Gap Between Cards', 'daily-slider' ),
+                'type'       => Controls_Manager::SLIDER,
+                'size_units' => [ 'px' ],
+                'default'    => [ 'size' => 24 ],
+                'range'      => [ 'px' => [ 'min' => 0, 'max' => 80, 'step' => 4 ] ],
+                'condition'  => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_row_gap',
+            [
+                'label'      => __( 'Gap Between Rows', 'daily-slider' ),
+                'type'       => Controls_Manager::SLIDER,
+                'size_units' => [ 'px' ],
+                'default'    => [ 'size' => 18 ],
+                'range'      => [ 'px' => [ 'min' => 0, 'max' => 60, 'step' => 4 ] ],
+                'condition'  => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->add_control(
+            'marquee_fade_color',
+            [
+                'label'       => __( 'Edge Fade Colour', 'daily-slider' ),
+                'type'        => Controls_Manager::COLOR,
+                'default'     => 'rgba(0,0,0,0)',
+                'description' => __( 'Match this to your section background to create a smooth fade at the left/right edges. Use transparent to disable.', 'daily-slider' ),
+                'condition'   => [ 'display_mode' => 'marquee' ],
+            ]
+        );
+
+        $this->end_controls_section();
+        // ── End Marquee Settings ─────────────────────────────────────────────────
+
         // Title Style Section
 
         
@@ -1239,6 +1457,56 @@ class ReviewCarousel_Widget extends Widget_Base {
         $settings = $this->get_settings_for_display();
         $id = 'ds-' . $this->get_id();
 
+        // ── Determine slide data source ──────────────────────────────────────────
+        $data_source = $settings['data_source'] ?? 'static';
+
+        if ( 'google' === $data_source ) {
+            $api_key    = trim( $settings['google_api_key'] ?? '' );
+            $place_id   = trim( $settings['google_place_id'] ?? '' );
+            $limit      = (int) ( $settings['google_limit'] ?? 5 );
+            $min_rating = (int) ( $settings['google_min_rating'] ?? 4 );
+
+            if ( empty( $api_key ) || empty( $place_id ) ) {
+                if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+                    echo '<div style="padding:20px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:13px;">'.
+                         '<strong>⚠️ Google Reviews:</strong> Please enter your <em>API Key</em> and <em>Place ID</em> in the widget settings to load reviews.</div>';
+                }
+                return;
+            }
+
+            $slides_data = \DailySlider_Google_Reviews_Bridge::get_reviews(
+                $place_id,
+                $api_key,
+                $limit,
+                $min_rating
+            );
+
+            if ( empty( $slides_data ) ) {
+                if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+                    echo '<div style="padding:20px;background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;font-size:13px;">'.
+                         '<strong>⚠️ Google Reviews:</strong> No reviews found matching your filters (min rating: ' . (int) $min_rating . '★). '.
+                         'Check your API Key, Place ID, and make sure the Places API is enabled.</div>';
+                }
+                return;
+            }
+        } else {
+            // Static repeater mode — original behaviour.
+            $slides_data = $settings['swiper_slides'] ?? [];
+
+            if ( empty( $slides_data ) ) {
+                return;
+            }
+        }
+        // ── End data source resolution ───────────────────────────────────────────
+
+        // ── Branch: marquee or carousel ──────────────────────────────────────────
+        $display_mode = $settings['display_mode'] ?? 'carousel';
+        if ( 'marquee' === $display_mode ) {
+            $this->render_marquee( $settings, $slides_data, $id );
+            return;
+        }
+        // ── (continues as Swiper carousel below) ────────────────────────────────
+
         $elementor_vp_lg = get_option( 'elementor_viewport_lg' );
 		$elementor_vp_md = get_option( 'elementor_viewport_md' );
 		$viewport_lg     = ! empty( $elementor_vp_lg ) ? $elementor_vp_lg - 1 : 1023;
@@ -1305,71 +1573,13 @@ class ReviewCarousel_Widget extends Widget_Base {
            <?php echo esc_attr($settings['content_align'] . ' ' . $settings['item_direction']); ?>">
 
                 <div class="swiper-wrapper">
-                    <?php if (!empty($settings['swiper_slides']) && is_array($settings['swiper_slides'])) : ?>
-                        <?php foreach ($settings['swiper_slides'] as $slide) : ?>
+                    <?php if ( ! empty( $slides_data ) && is_array( $slides_data ) ) : ?>
+                        <?php foreach ( $slides_data as $slide ) : ?>
                             <div class="swiper-slide daily-slide-item">
-
-                                <div class="daily-img-content-wrap">
-                                    <?php if (!empty($settings['show_avatar_image'])) : ?>
-                                        <div class="daily-image-wrap">
-                                            <?php if (!empty($slide['avatar_image']['id'])) : ?>
-                                                <?php
-                                                // Use wp_get_attachment_image() to output the image with proper attributes
-                                                echo wp_get_attachment_image(
-                                                    $slide['avatar_image']['id'], 
-                                                    'full', 
-                                                    false, 
-                                                    [
-                                                        'class' => 'daily-avatar',
-                                                        'alt'   => esc_attr($slide['name'] ?? __('Avatar', 'daily-slider')), // Fallback to 'Avatar' if name is unavailable
-                                                    ]
-                                                );
-                                                ?>
-                                            <?php else : ?>
-                                                <!-- Fallback image if no avatar image ID is set -->
-                                                <img 
-                                                    class="daily-avatar" 
-                                                    src="<?php echo esc_url($slide['avatar_image']['url']); ?>" 
-                                                    alt="<?php echo esc_attr($slide['name'] ?? __('Avatar', 'daily-slider')); ?>" 
-                                                />
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="daily-avatar-content">
-                                        <?php if (!empty($settings['show_name']) && !empty($slide['name'])) : ?>
-                                        <!-- Render the title without the dynamic tag -->
-                                        <h3 class="daily-avatar-name">
-                                            <?php echo esc_html($slide['name']); ?>
-                                        </h3>
-                                        <?php endif; ?>
-
-                                        <?php if (!empty($settings['show_dagination']) && !empty($slide['dagination'])) : ?>
-                                        <span class="daily-avatar-dagination">
-                                            <?php echo esc_html($slide['dagination']); ?>
-                                        </span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                
-                                <div class="daily-review-content">
-                                <?php if (!empty($settings['show_star_rating'])) : ?>
-                                    <div class="daily-review-rating">
-                                        <?php for ($i = 0; $i < intval($slide['rating']['size']); $i++) : ?>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-star">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path d="M12 3l2.597 6.385h6.403l-5.14 4.717 1.932 6.093-5.192 -4.192-5.192 4.192 1.932 -6.093-5.14 -4.717h6.403z" />
-                                            </svg>
-                                        <?php endfor; ?>
-                                    </div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($settings['show_text']) && !empty($slide['text'])) : ?>
-                                        <p class="daily-text"><?php echo esc_html($slide['text']); ?></p>
-                                    <?php endif; ?>
-                                </div>
-                                
-                            </div>
+                                <?php $this->render_card( $settings, $slide ); ?>
+                            </div><!-- /.daily-slide-item -->
                         <?php endforeach; ?>
-                    <?php endif; ?>
+                    <?php endif; // end slides_data loop ?>
                 </div>
             </div>
 
@@ -1399,5 +1609,167 @@ class ReviewCarousel_Widget extends Widget_Base {
         </div>
         <?php
     }
-    
+
+    /**
+     * Render the marquee (infinite-scroll) display mode.
+     *
+     * @param array  $settings   Widget settings array from get_settings_for_display().
+     * @param array  $slides_data Normalised slides array (same shape as swiper_slides repeater).
+     * @param string $id         Unique widget DOM ID.
+     */
+    private function render_marquee( $settings, $slides_data, $id ) {
+        $num_rows    = max( 1, min( 4, (int) ( $settings['marquee_rows'] ?? 2 ) ) );
+        $speed       = max( 5, (int) ( $settings['marquee_speed'] ?? 35 ) );
+        $direction   = $settings['marquee_direction'] ?? 'alternate';
+        $pause_hover = ! empty( $settings['marquee_pause_hover'] ) && 'yes' === $settings['marquee_pause_hover'];
+        $card_w      = (int) ( $settings['marquee_card_width']['size'] ?? 320 );
+        $gap         = (int) ( $settings['marquee_gap']['size'] ?? 24 );
+        $row_gap     = (int) ( $settings['marquee_row_gap']['size'] ?? 18 );
+        $fade_color  = esc_attr( $settings['marquee_fade_color'] ?? 'rgba(0,0,0,0)' );
+
+        $wrapper_classes = 'ds-review-carousel ds-marquee-mode';
+        if ( $pause_hover ) {
+            $wrapper_classes .= ' ds-pause-on-hover';
+        }
+
+        $inline_style = sprintf(
+            '--marquee-speed:%ds; --marquee-gap:%dpx; --marquee-card-w:%dpx; --marquee-row-gap:%dpx; --ds-fade-color:%s;',
+            $speed, $gap, $card_w, $row_gap, $fade_color
+        );
+        ?>
+        <div
+            class="<?php echo esc_attr( $wrapper_classes ); ?>"
+            id="<?php echo esc_attr( $id ); ?>"
+            style="<?php echo $inline_style; ?>"
+        >
+            <?php for ( $row = 0; $row < $num_rows; $row++ ) :
+                // Determine scroll direction for this row
+                if ( 'alternate' === $direction ) {
+                    $row_dir = ( 0 === $row % 2 ) ? 'left' : 'right';
+                } elseif ( 'right' === $direction ) {
+                    $row_dir = 'right';
+                } else {
+                    $row_dir = 'left';
+                }
+            ?>
+            <div class="ds-marquee-row" data-direction="<?php echo esc_attr( $row_dir ); ?>">
+                <div class="ds-marquee-track">
+                    <?php
+                    // Output 4 copies of all slides.
+                    // The CSS animation moves -50% so 2 copies slide off while
+                    // 2 remain in view — seamless at any viewport width.
+                    for ( $copy = 0; $copy < 4; $copy++ ) :
+                        $aria_hidden = ( $copy > 0 ) ? ' aria-hidden="true"' : '';
+                    ?>
+                        <div class="ds-marquee-copy"<?php echo $aria_hidden; ?>>
+                            <?php foreach ( $slides_data as $slide ) : ?>
+                                <div class="daily-slide-item">
+                                    <?php $this->render_card( $settings, $slide ); ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endfor; ?>
+                </div><!-- /.ds-marquee-track -->
+            </div><!-- /.ds-marquee-row -->
+            <?php endfor; ?>
+        </div><!-- /.ds-review-carousel.ds-marquee-mode -->
+        <?php
+    }
+
+    /**
+     * Render the inner content of a single review card.
+     * Used by both the Swiper and Marquee render paths — keeps card markup DRY.
+     *
+     * @param array $settings  Widget settings.
+     * @param array $slide     Single slide data array.
+     */
+    private function render_card( $settings, $slide ) { ?>
+
+        <!-- ── Top row: Stars (left) + Google G logo (right) ── -->
+        <div class="daily-card-top">
+
+            <?php if ( ! empty( $settings['show_star_rating'] ) ) : ?>
+                <div class="daily-review-rating" aria-label="<?php echo (int) ( $slide['rating']['size'] ?? 5 ); ?> out of 5 stars">
+                    <?php
+                    $rating    = (int) ( $slide['rating']['size'] ?? 5 );
+                    for ( $i = 0; $i < 5; $i++ ) :
+                        if ( $i < $rating ) : ?>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        <?php else : ?>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" style="opacity:.30">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        <?php endif;
+                    endfor; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Google multicolour "G" logo -->
+            <div class="daily-google-badge" aria-label="Google Review">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+            </div>
+
+        </div><!-- /.daily-card-top -->
+
+        <!-- ── Bold headline: first 5 words of review ── -->
+        <?php if ( ! empty( $settings['show_name'] ) && ! empty( $slide['text'] ) ) :
+            $words    = preg_split( '/\s+/', trim( $slide['text'] ) );
+            $headline = count( $words ) <= 5 ? $slide['text'] : implode( ' ', array_slice( $words, 0, 5 ) ) . '…';
+        ?>
+            <h3 class="daily-review-headline"><?php echo esc_html( $headline ); ?></h3>
+        <?php endif; ?>
+
+        <!-- ── Full review body text ── -->
+        <?php if ( ! empty( $settings['show_text'] ) && ! empty( $slide['text'] ) ) : ?>
+            <div class="daily-review-content">
+                <p class="daily-text"><?php echo esc_html( $slide['text'] ); ?></p>
+            </div>
+        <?php endif; ?>
+
+        <!-- ── Footer: avatar + name + date ── -->
+        <div class="daily-card-footer">
+
+            <?php if ( ! empty( $settings['show_avatar_image'] ) ) : ?>
+                <div class="daily-image-wrap">
+                    <?php if ( ! empty( $slide['avatar_image']['id'] ) ) : ?>
+                        <?php echo wp_get_attachment_image(
+                            $slide['avatar_image']['id'], 'thumbnail', false,
+                            [ 'class' => 'daily-avatar', 'alt' => esc_attr( $slide['name'] ?? '' ) ]
+                        ); ?>
+                    <?php elseif ( ! empty( $slide['avatar_image']['url'] ) ) : ?>
+                        <img class="daily-avatar" src="<?php echo esc_url( $slide['avatar_image']['url'] ); ?>"
+                             alt="<?php echo esc_attr( $slide['name'] ?? '' ); ?>" loading="lazy" />
+                    <?php else : ?>
+                        <div class="daily-avatar-initials" aria-hidden="true"><?php
+                            $n = trim( $slide['name'] ?? '' );
+                            if ( $n ) {
+                                $p = explode( ' ', $n );
+                                echo esc_html( strtoupper( substr( $p[0], 0, 1 ) ) . ( isset( $p[1] ) ? strtoupper( substr( $p[1], 0, 1 ) ) : '' ) );
+                            } else { echo '?'; }
+                        ?></div>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="daily-avatar-info">
+                <?php if ( ! empty( $settings['show_name'] ) && ! empty( $slide['name'] ) ) : ?>
+                    <strong class="daily-avatar-name"><?php echo esc_html( $slide['name'] ); ?></strong>
+                <?php endif; ?>
+                <?php if ( ! empty( $settings['show_dagination'] ) && ! empty( $slide['dagination'] ) ) : ?>
+                    <span class="daily-avatar-dagination"><?php echo esc_html( $slide['dagination'] ); ?></span>
+                <?php endif; ?>
+            </div>
+
+        </div><!-- /.daily-card-footer -->
+    <?php
+    }
+
 }
+
