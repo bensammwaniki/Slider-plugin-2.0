@@ -75,10 +75,10 @@ class ReviewCarousel_Widget extends Widget_Base {
         $this->add_control(
             'google_place_id',
             [
-                'label'       => __( 'Google Place ID', 'daily-slider' ),
+                'label'       => __( 'Google Place ID or CID', 'daily-slider' ),
                 'type'        => Controls_Manager::TEXT,
-                'placeholder' => 'ChIJN1t_tDeuEmsRUsoyG83frY4',
-                'description' => __( 'Find your Place ID at: developers.google.com/maps/documentation/places/web-service/place-id', 'daily-slider' ),
+                'placeholder' => 'e.g. ChIJN1t_tDeuEmsRUsoyG83frY4 or 10281119596374313554',
+                'description' => __( 'Enter your Google Place ID, Google Map CID (decimal or hex), or paste the full Google Maps browser URL / sharing link.', 'daily-slider' ),
                 'label_block' => true,
                 'condition'   => [ 'data_source' => 'google' ],
             ]
@@ -1469,7 +1469,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             if ( empty( $api_key ) || empty( $place_id ) ) {
                 if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
                     echo '<div style="padding:20px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:13px;">'.
-                         '<strong>⚠️ Google Reviews:</strong> Please enter your <em>API Key</em> and <em>Place ID</em> in the widget settings to load reviews.</div>';
+                         '<strong>⚠️ Google Reviews:</strong> Please enter your <em>API Key</em> and <em>Place ID or CID</em> in the widget settings to load reviews.</div>';
                 }
                 return;
             }
@@ -1485,7 +1485,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
                     echo '<div style="padding:20px;background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;font-size:13px;">'.
                          '<strong>⚠️ Google Reviews:</strong> No reviews found matching your filters (min rating: ' . (int) $min_rating . '★). '.
-                         'Check your API Key, Place ID, and make sure the Places API is enabled.</div>';
+                         'Check your API Key, Place ID or CID, and make sure the Places API is enabled.</div>';
                 }
                 return;
             }
