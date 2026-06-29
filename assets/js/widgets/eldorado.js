@@ -303,6 +303,7 @@
                     swiper.setTransition(0);
                   }
                 }
+                swiper.animating = false;
               } else {
                 if (typeof swiper.autoplay.pause === "function") {
                   swiper.autoplay.pause();
@@ -317,6 +318,19 @@
               if (!swiper || !swiper.autoplay) return;
 
               if (settings.smoothScroll) {
+                swiper.animating = false;
+                if (typeof swiper.setTransition === "function") {
+                  swiper.setTransition(swiper.params.speed);
+                }
+                if (swiper.params.autoplay && swiper.params.autoplay.reverseDirection) {
+                  if (typeof swiper.slidePrev === "function") {
+                    swiper.slidePrev(swiper.params.speed, true, true);
+                  }
+                } else {
+                  if (typeof swiper.slideNext === "function") {
+                    swiper.slideNext(swiper.params.speed, true, true);
+                  }
+                }
                 if (typeof swiper.autoplay.start === "function") {
                   swiper.autoplay.start();
                 }

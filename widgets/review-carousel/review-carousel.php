@@ -131,7 +131,7 @@ class ReviewCarousel_Widget extends Widget_Base {
         $this->start_controls_section(
             'genarel_section',
             [
-                'label' => __('Genarel', 'daily-slider'),
+                'label' => __('General', 'daily-slider'),
                 'tab' => Controls_Manager::TAB_CONTENT,
             ]
         );
@@ -174,6 +174,18 @@ class ReviewCarousel_Widget extends Widget_Base {
             'show_name',
             [
                 'label' => __('Show Name', 'daily-slider'),
+                'type' => Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'daily-slider'),
+                'label_off' => __('No', 'daily-slider'),
+                'return_value' => 'yes',
+                'default' => 'yes',
+            ]
+        );
+
+        $this->add_control(
+            'show_headline',
+            [
+                'label' => __('Show Review Heading', 'daily-slider'),
                 'type' => Controls_Manager::SWITCHER,
                 'label_on' => __('Yes', 'daily-slider'),
                 'label_off' => __('No', 'daily-slider'),
@@ -325,6 +337,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Review Item', 'daily-slider'),
                 'type' => Controls_Manager::REPEATER,
                 'fields' => $repeater->get_controls(),
+                'prevent_empty' => false,
                 'default' => [
                     [
                         'name' => __('John D.', 'daily-slider'),
@@ -368,16 +381,28 @@ class ReviewCarousel_Widget extends Widget_Base {
     
         $this->end_controls_section(); // Close swiper_slides_section
     
-        // Swiper Settings Section
+         // Review Settings Section (Combined Carousel & Marquee Settings)
         $this->start_controls_section(
-            'swiper_settings_section',
+            'review_settings_section',
             [
-                'label' => __('Carousel Settings', 'daily-slider'),
+                'label' => __('Review Settings', 'daily-slider'),
                 'tab' => Controls_Manager::TAB_CONTENT,
             ]
         );
 
-        
+        $this->add_control(
+            'display_mode',
+            [
+                'label'   => __( 'Display Mode', 'daily-slider' ),
+                'type'    => Controls_Manager::SELECT,
+                'default' => 'carousel',
+                'options' => [
+                    'carousel' => __( '▶ Carousel (Swiper)', 'daily-slider' ),
+                    'marquee'  => __( '↔ Marquee (Infinite Scroll)', 'daily-slider' ),
+                ],
+            ]
+        );
+
         $this->add_control(
             'swiper_effect',
             [
@@ -388,11 +413,10 @@ class ReviewCarousel_Widget extends Widget_Base {
                     'slide' => __('Slide', 'daily-slider'),
                     'coverflow' => __('Coverflow', 'daily-slider'),
                 ],
-                // 'separator' => 'before',
+                'condition' => [ 'display_mode' => 'carousel' ],
             ]
         );
 
-        
         $this->add_responsive_control(
 			'columns',
 			[
@@ -409,7 +433,7 @@ class ReviewCarousel_Widget extends Widget_Base {
 					5 => '5',
 					6 => '6',
 				],
-                // 'separator' => 'before',
+                'condition' => [ 'display_mode' => 'carousel' ],
 			]
 		);
 
@@ -433,6 +457,7 @@ class ReviewCarousel_Widget extends Widget_Base {
 						'max' => 100,
 					],
 				],
+                'condition' => [ 'display_mode' => 'carousel' ],
 			]
 		);
         
@@ -445,6 +470,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label_off' => __('No', 'daily-slider'),
                 'default' => 'yes',
                 'separator' => 'before',
+                'condition' => [ 'display_mode' => 'carousel' ],
             ]
         );
     
@@ -455,6 +481,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::NUMBER,
                 'default' => 3000,
                 'condition' => [
+                    'display_mode' => 'carousel',
                     'swiper_autoplay' => 'yes',
                 ],
             ]
@@ -468,6 +495,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label_on' => __('Yes', 'daily-slider'),
                 'label_off' => __('No', 'daily-slider'),
                 'default' => 'yes',
+                'condition' => [ 'display_mode' => 'carousel' ],
             ]
         );
 
@@ -479,6 +507,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label_on' => __('Yes', 'daily-slider'),
                 'label_off' => __('No', 'daily-slider'),
                 'default' => 'no',
+                'condition' => [ 'display_mode' => 'carousel' ],
             ]
         );
     
@@ -488,6 +517,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Transition Speed (ms)', 'daily-slider'),
                 'type' => Controls_Manager::NUMBER,
                 'default' => 600,
+                'condition' => [ 'display_mode' => 'carousel' ],
             ]
         );
 
@@ -499,6 +529,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label_on' => __('Yes', 'daily-slider'),
                 'label_off' => __('No', 'daily-slider'),
                 'default' => 'no',
+                'condition' => [ 'display_mode' => 'carousel' ],
             ]
         );
 
@@ -510,30 +541,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label_on' => __('Yes', 'daily-slider'),
                 'label_off' => __('No', 'daily-slider'),
                 'default' => 'yes',
-            ]
-        );
-    
-        $this->end_controls_section(); // Close swiper_settings_section
-
-        // ── Marquee (Infinite Scroll) Settings ──────────────────────────────────
-        $this->start_controls_section(
-            'marquee_settings_section',
-            [
-                'label' => __( '🔄 Marquee Settings', 'daily-slider' ),
-                'tab'   => Controls_Manager::TAB_CONTENT,
-            ]
-        );
-
-        $this->add_control(
-            'display_mode',
-            [
-                'label'   => __( 'Display Mode', 'daily-slider' ),
-                'type'    => Controls_Manager::SELECT,
-                'default' => 'carousel',
-                'options' => [
-                    'carousel' => __( '▶ Carousel (Swiper)', 'daily-slider' ),
-                    'marquee'  => __( '↔ Marquee (Infinite Scroll)', 'daily-slider' ),
-                ],
+                'condition' => [ 'display_mode' => 'carousel' ],
             ]
         );
 
@@ -641,7 +649,6 @@ class ReviewCarousel_Widget extends Widget_Base {
         );
 
         $this->end_controls_section();
-        // ── End Marquee Settings ─────────────────────────────────────────────────
 
         // Title Style Section
 
@@ -1618,6 +1625,16 @@ class ReviewCarousel_Widget extends Widget_Base {
      * @param string $id         Unique widget DOM ID.
      */
     private function render_marquee( $settings, $slides_data, $id ) {
+        // Repeat slides if they are too few, to ensure we fill the screen width and prevent loop gaps.
+        $count = count( $slides_data );
+        if ( $count > 0 && $count < 8 ) {
+            $repeated_slides = [];
+            while ( count( $repeated_slides ) < 8 ) {
+                $repeated_slides = array_merge( $repeated_slides, $slides_data );
+            }
+            $slides_data = $repeated_slides;
+        }
+
         $num_rows    = max( 1, min( 4, (int) ( $settings['marquee_rows'] ?? 2 ) ) );
         $speed       = max( 5, (int) ( $settings['marquee_speed'] ?? 35 ) );
         $direction   = $settings['marquee_direction'] ?? 'alternate';
@@ -1719,7 +1736,7 @@ class ReviewCarousel_Widget extends Widget_Base {
         </div><!-- /.daily-card-top -->
 
         <!-- ── Bold headline: first 5 words of review ── -->
-        <?php if ( ! empty( $settings['show_name'] ) && ! empty( $slide['text'] ) ) :
+        <?php if ( ! empty( $settings['show_headline'] ) && 'yes' === $settings['show_headline'] && ! empty( $slide['text'] ) ) :
             $words    = preg_split( '/\s+/', trim( $slide['text'] ) );
             $headline = count( $words ) <= 5 ? $slide['text'] : implode( ' ', array_slice( $words, 0, 5 ) ) . '…';
         ?>

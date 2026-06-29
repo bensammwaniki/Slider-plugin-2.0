@@ -349,7 +349,7 @@
   .ds-marquee-track {
     display: flex;
     align-items: stretch;
-    gap: var(--marquee-gap);
+    gap: 0;
     width: max-content;
     will-change: transform;
 
@@ -361,7 +361,7 @@
   .ds-marquee-copy {
     display: flex;
     align-items: stretch;
-    gap: var(--marquee-gap);
+    gap: 0;
     flex-shrink: 0;
   }
 
@@ -370,9 +370,10 @@
     animation: ds-marquee-right var(--marquee-speed) linear infinite;
   }
 
-  /* Cards in marquee have fixed width */
+  /* Cards in marquee have fixed width and margin-right for gap */
   .daily-slide-item {
     width: var(--marquee-card-w);
+    margin-right: var(--marquee-gap);
     flex-shrink: 0;
     cursor: default;
   }
