@@ -133,6 +133,10 @@ class Eldorado_Widget extends Widget_Base {
                         'title' => esc_html__( 'Right', 'daily-slider' ),
                         'icon' => 'eicon-text-align-right',
                     ],
+                    'justify' => [
+                        'title' => esc_html__( 'Justify', 'daily-slider' ),
+                        'icon' => 'eicon-text-align-justify',
+                    ],
                 ],
                 'default' => 'center',
                 'toggle' => true,

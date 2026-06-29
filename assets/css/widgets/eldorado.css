@@ -18,6 +18,20 @@
     .swiper-wrapper {
       transition-timing-function: linear !important;
     }
+    .swiper-slide {
+      width: auto !important;
+      flex: 0 0 auto !important;
+    }
+    .daily-slide-card {
+      width: auto !important;
+    }
+    .daily-image-wrap {
+      width: auto !important;
+      .daily-avatar {
+        width: auto !important;
+        height: 100% !important;
+      }
+    }
   }
 
   .swiper-slide {
@@ -101,6 +115,9 @@
     height: 300px;
     flex: 0 0 auto;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     .daily-avatar {
       display: block;
       width: 100%;
@@ -109,6 +126,13 @@
       object-fit: cover;
       object-position: center;
       transition: transform 0.3s ease;
+
+      /* When cover is selected, ensure uniform height and auto-width to avoid stretching/clipping */
+      &[style*="cover"] {
+        width: auto !important;
+        max-width: 100% !important;
+        height: 100% !important;
+      }
     }
   }
 

@@ -22,10 +22,15 @@
 
   /* ── Glassmorphism card ─────────────────────────────────────────── */
   .daily-slide-item {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    --card-bg-base: #ffffff;
+    --card-bg-opacity: 0.08;
+    --card-blur: 14px;
+    --card-border-color: rgba(255, 255, 255, 0.14);
+
+    background: color-mix(in srgb, var(--card-bg-base) calc(var(--card-bg-opacity) * 100%), transparent);
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
+    border: 1px solid var(--card-border-color);
     border-radius: 18px;
     padding: 22px 22px 18px;
     display: flex;
@@ -287,6 +292,9 @@
   .daily-content-right {
     text-align: right;
     .daily-card-footer { flex-direction: row-reverse; }
+  }
+  .daily-content-justify {
+    text-align: justify;
   }
 
   /* Direction */

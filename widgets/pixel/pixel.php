@@ -644,12 +644,17 @@ $this->add_responsive_control(
                 'title' => __('Right', 'daily-slider'),
                 'icon' => 'eicon-text-align-right',
             ],
+            'justify' => [
+                'title' => __('Justify', 'daily-slider'),
+                'icon' => 'eicon-text-align-justify',
+            ],
         ],
         'default' => 'flex-start',
         'selectors_dictionary' => [
             'flex-start' => 'justify-content: flex-start; text-align: left;',
             'center' => 'justify-content: center; text-align: center;',
             'flex-end' => 'justify-content: flex-end; text-align: right;',
+            'justify' => 'justify-content: flex-start; text-align: justify;',
         ],
         'selectors' => [
             '{{WRAPPER}} .daily-content-wrap, {{WRAPPER}} .daily-content-inner' => '{{VALUE}}',

@@ -230,6 +230,18 @@ class ReviewCarousel_Widget extends Widget_Base {
             ]
         );
 
+        $this->add_control(
+            'show_google_logo',
+            [
+                'label' => __('Show Google Logo', 'daily-slider'),
+                'type' => Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'daily-slider'),
+                'label_off' => __('No', 'daily-slider'),
+                'return_value' => 'yes',
+                'default' => 'yes',
+            ]
+        );
+
         // alignment control
         $this->add_control(
             'content_align',
@@ -248,6 +260,10 @@ class ReviewCarousel_Widget extends Widget_Base {
                     'daily-content-right' => [
                         'title' => __('Right', 'daily-slider'),
                         'icon' => 'eicon-text-align-right',
+                    ],
+                    'daily-content-justify' => [
+                        'title' => __('Justify', 'daily-slider'),
+                        'icon' => 'eicon-text-align-justify',
                     ],
                 ],
                 'default' => 'center',
@@ -661,13 +677,82 @@ class ReviewCarousel_Widget extends Widget_Base {
             ]
         );
 
+        $this->add_control(
+            'card_base_color',
+            [
+                'label' => __('Card Color', 'daily-slider'),
+                'type' => Controls_Manager::COLOR,
+                'default' => '#ffffff',
+                'selectors' => [
+                    '{{WRAPPER}} .ds-review-carousel .daily-slide-item' => '--card-bg-base: {{VALUE}};',
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'card_bg_opacity',
+            [
+                'label' => __('Card Opacity', 'daily-slider'),
+                'type' => Controls_Manager::SLIDER,
+                'range' => [
+                    'px' => [
+                        'min' => 0,
+                        'max' => 1,
+                        'step' => 0.01,
+                    ],
+                ],
+                'default' => [
+                    'unit' => 'px',
+                    'size' => 0.08,
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .ds-review-carousel .daily-slide-item' => '--card-bg-opacity: {{SIZE}};',
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'card_blur_amount',
+            [
+                'label' => __('Blur Amount', 'daily-slider'),
+                'type' => Controls_Manager::SLIDER,
+                'range' => [
+                    'px' => [
+                        'min' => 0,
+                        'max' => 50,
+                        'step' => 1,
+                    ],
+                ],
+                'default' => [
+                    'unit' => 'px',
+                    'size' => 14,
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .ds-review-carousel .daily-slide-item' => '--card-blur: {{SIZE}}px;',
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'card_border_color_custom',
+            [
+                'label' => __('Card Border Color', 'daily-slider'),
+                'type' => Controls_Manager::COLOR,
+                'default' => 'rgba(255, 255, 255, 0.14)',
+                'selectors' => [
+                    '{{WRAPPER}} .ds-review-carousel .daily-slide-item' => '--card-border-color: {{VALUE}};',
+                ],
+                'separator' => 'after',
+            ]
+        );
+
         $this->add_group_control(
             \Elementor\Group_Control_Background::get_type(),
             [
                 'name' => 'item_background',
-                'label' => __('Background', 'daily-slider'),
+                'label' => __('Background Override', 'daily-slider'),
                 'types' => ['classic', 'gradient'],
-                'selector' => '{{WRAPPER}} .daily-slide-item',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-slide-item',
             ]
         );
 
@@ -678,7 +763,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-slide-item' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-slide-item' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -687,8 +772,8 @@ class ReviewCarousel_Widget extends Widget_Base {
             \Elementor\Group_Control_Border::get_type(),
             [
                 'name' => 'item_border',
-                'label' => __('Border', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-slide-item',
+                'label' => __('Border Override', 'daily-slider'),
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-slide-item',
             ]
         );
 
@@ -699,7 +784,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-slide-item' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-slide-item' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -708,7 +793,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             \Elementor\Group_Control_Box_Shadow::get_type(),
             [
                 'name' => 'item_box_shadow',
-                'selector' => '{{WRAPPER}} .daily-slide-item',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-slide-item',
             ]
         );
 
@@ -721,7 +806,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-slide-item' => 'gap: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-slide-item' => 'gap: {{SIZE}}{{UNIT}};',
                 ],
                 'separator' => 'before',
             ]
@@ -750,7 +835,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-image-wrap' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-image-wrap' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
@@ -762,7 +847,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             [
                 'name' => 'avatar_image_border',
                 'label' => __('Border', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-image-wrap',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-image-wrap',
             ]
         );
 
@@ -775,7 +860,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-image-wrap' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-image-wrap' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -786,7 +871,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             \Elementor\Group_Control_Box_Shadow::get_type(),
             [
                 'name' => 'avatar_image_box_shadow',
-                'selector' => '{{WRAPPER}} .daily-image-wrap',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-image-wrap',
             ]
         );
 
@@ -799,7 +884,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-image-wrap' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-image-wrap' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -813,7 +898,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-img-content-wrap' => 'gap: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-img-content-wrap' => 'gap: {{SIZE}}{{UNIT}};',
                 ],
                 'separator' => 'before',
             ]
@@ -839,7 +924,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Color', 'daily-slider'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .daily-avatar-name' => 'color: {{VALUE}}',
+                    '{{WRAPPER}} .ds-review-carousel .daily-avatar-name' => 'color: {{VALUE}}',
                 ],
             ]
         );
@@ -848,7 +933,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             \Elementor\Group_Control_Text_Stroke::get_type(),
             [
                 'name' => 'text_stroke',
-                'selector' => '{{WRAPPER}} .daily-avatar-name',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-avatar-name',
             ]
         );
         
@@ -858,7 +943,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             [
                 'name' => 'name_typography',
                 'label' => __('Typography', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-avatar-name',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-avatar-name',
             ]
         );
 
@@ -870,7 +955,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-avatar-name' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-avatar-name' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -896,7 +981,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Color', 'daily-slider'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .daily-avatar-dagination' => 'color: {{VALUE}}',
+                    '{{WRAPPER}} .ds-review-carousel .daily-avatar-dagination' => 'color: {{VALUE}}',
                 ],
             ]
         );
@@ -907,7 +992,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             [
                 'name' => 'dagination_typography',
                 'label' => __('Typography', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-avatar-dagination',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-avatar-dagination',
                 'separator' => 'after',
             ]
         );
@@ -920,7 +1005,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-avatar-dagination' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-avatar-dagination' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -946,7 +1031,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Color', 'daily-slider'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .daily-review-rating svg' => 'color: {{VALUE}}',
+                    '{{WRAPPER}} .ds-review-carousel .daily-review-rating svg' => 'color: {{VALUE}}',
                 ],
             ]
         );
@@ -960,21 +1045,21 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-review-rating svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-review-rating svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
 
         // Margin control for rating
 
-        $this->add_responsive_control(
+         $this->add_responsive_control(
             'rating_margin',
             [
                 'label' => __('Margin', 'daily-slider'),
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-review-rating' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-review-rating' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -988,7 +1073,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-review-rating' => 'gap: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-review-rating' => 'gap: {{SIZE}}{{UNIT}};',
                 ],
                 'separator' => 'before',
             ]
@@ -1016,7 +1101,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Color', 'daily-slider'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .daily-text' => 'color: {{VALUE}}',
+                    '{{WRAPPER}} .ds-review-carousel .daily-text' => 'color: {{VALUE}}',
                 ],
             ]
         );
@@ -1027,7 +1112,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             [
                 'name' => 'description_typography',
                 'label' => __('Typography', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-text',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-text',
                 'separator' => 'after',
             ]
         );
@@ -1040,7 +1125,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-text' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-text' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -1078,7 +1163,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Color', 'daily-slider'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .daily-nav-button' => 'color: {{VALUE}}',
+                    '{{WRAPPER}} .ds-review-carousel .daily-nav-button' => 'color: {{VALUE}}',
                 ],
             ]
         );
@@ -1090,7 +1175,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'name' => 'nav_background',
                 'label' => __('Background', 'daily-slider'),
                 'types' => ['classic', 'gradient'],
-                'selector' => '{{WRAPPER}} .daily-nav-button',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-nav-button',
             ]
         );
 
@@ -1103,7 +1188,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-nav-button' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-nav-button' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -1115,7 +1200,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             [
                 'name' => 'nav_border',
                 'label' => __('Border', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-nav-button',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-nav-button',
             ]
 
         );
@@ -1126,7 +1211,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             \Elementor\Group_Control_Box_Shadow::get_type(),
             [
                 'name' => 'nav_box_shadow',
-                'selector' => '{{WRAPPER}} .daily-nav-button',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-nav-button',
             ]
         );
 
@@ -1139,7 +1224,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-nav-button' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-nav-button' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -1167,7 +1252,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                     ],
                 ],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-nav-button' => '--navigation-horizontal-spacing: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-nav-button' => '--navigation-horizontal-spacing: {{SIZE}}{{UNIT}};',
                 ],
                 'separator' => 'before',
             ]
@@ -1190,7 +1275,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Color', 'daily-slider'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .daily-nav-button:hover' => 'color: {{VALUE}}',
+                    '{{WRAPPER}} .ds-review-carousel .daily-nav-button:hover' => 'color: {{VALUE}}',
                 ],
             ]
         );
@@ -1202,7 +1287,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'name' => 'nav_hover_background',
                 'label' => __('Background', 'daily-slider'),
                 'types' => ['classic', 'gradient'],
-                'selector' => '{{WRAPPER}} .daily-nav-button:hover:before',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-nav-button:hover:before',
             ]
         );
 
@@ -1214,7 +1299,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'label' => __('Border Color', 'daily-slider'),
                 'type' => Controls_Manager::COLOR,
                 'selectors' => [
-                    '{{WRAPPER}} .daily-nav-button:hover' => 'border-color: {{VALUE}}',
+                    '{{WRAPPER}} .ds-review-carousel .daily-nav-button:hover' => 'border-color: {{VALUE}}',
                 ],
             ]
         );
@@ -1225,7 +1310,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             \Elementor\Group_Control_Box_Shadow::get_type(),
             [
                 'name' => 'nav_hover_box_shadow',
-                'selector' => '{{WRAPPER}} .daily-nav-button:hover',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-nav-button:hover',
             ]
         );
 
@@ -1266,7 +1351,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet' => 'width: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet' => 'width: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
@@ -1280,7 +1365,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet' => 'height: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet' => 'height: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
@@ -1294,7 +1379,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'name' => 'pagination_background',
                 'label' => __('Background', 'daily-slider'),
                 'types' => ['classic', 'gradient'],
-                'selector' => '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet',
             ]
         );
 
@@ -1305,7 +1390,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             [
                 'name' => 'pagination_border',
                 'label' => __('Border', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet',
             ]
 
         );
@@ -1319,7 +1404,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -1333,7 +1418,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -1347,7 +1432,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination' => 'gap: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination' => 'gap: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
@@ -1374,7 +1459,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                     ],
                 ],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination' => '--pagination-vertical-spacing: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination' => '--pagination-vertical-spacing: {{SIZE}}{{UNIT}};',
                 ],
                 'separator' => 'before',
             ]
@@ -1398,7 +1483,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet-active' => 'width: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet-active' => 'width: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
@@ -1412,7 +1497,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet-active' => 'height: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet-active' => 'height: {{SIZE}}{{UNIT}};',
                 ],
             ]
         );
@@ -1425,7 +1510,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'name' => 'pagination_active_background',
                 'label' => __('Background', 'daily-slider'),
                 'types' => ['classic', 'gradient'],
-                'selector' => '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet-active',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet-active',
             ]
         );
 
@@ -1436,7 +1521,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             [
                 'name' => 'pagination_active_border',
                 'label' => __('Border', 'daily-slider'),
-                'selector' => '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet-active',
+                'selector' => '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet-active',
             ]
 
         );
@@ -1450,7 +1535,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                 'type' => Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-pagination .swiper-pagination-bullet-active' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .ds-review-carousel .daily-pagination .swiper-pagination-bullet-active' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
         );
@@ -1724,6 +1809,7 @@ class ReviewCarousel_Widget extends Widget_Base {
             <?php endif; ?>
 
             <!-- Google multicolour "G" logo -->
+            <?php if ( ! empty( $settings['show_google_logo'] ) && 'yes' === $settings['show_google_logo'] ) : ?>
             <div class="daily-google-badge" aria-label="Google Review">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -1732,6 +1818,7 @@ class ReviewCarousel_Widget extends Widget_Base {
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
             </div>
+            <?php endif; ?>
 
         </div><!-- /.daily-card-top -->
 
