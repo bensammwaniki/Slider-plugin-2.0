@@ -483,9 +483,10 @@ class Modal_Widget extends Widget_Base {
         $is_editor = \Elementor\Plugin::$instance->editor->is_edit_mode();
         
         $preview_class = ( ! empty( $settings['preview_modal'] ) && $settings['preview_modal'] === 'yes' && $is_editor ) ? ' is-open preview-mode' : '';
+        $inline_style = empty( $preview_class ) ? ' style="display: none;"' : '';
         ?>
         <div class="daily-modal-wrapper">
-            <div id="<?php echo esc_attr( $modal_id ); ?>" class="daily-modal<?php echo esc_attr( $preview_class ); ?>" data-trigger-hash="<?php echo esc_attr( $trigger_hash ); ?>">
+            <div id="<?php echo esc_attr( $modal_id ); ?>" class="daily-modal<?php echo esc_attr( $preview_class ); ?>" data-trigger-hash="<?php echo esc_attr( $trigger_hash ); ?>"<?php echo $inline_style; ?>>
                 <div class="daily-modal-backdrop"></div>
                 <div class="daily-modal-content">
                     <button type="button" class="daily-modal-close" aria-label="<?php esc_attr_e( 'Close', 'daily-slider' ); ?>">&times;</button>

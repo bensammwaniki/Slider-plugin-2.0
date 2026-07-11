@@ -14,6 +14,8 @@
       if ($modal.data("dailyModalInited")) return;
       $modal.data("dailyModalInited", true);
 
+      $modal.css("display", "");
+
       var hash = $modal.attr("data-trigger-hash") || "#" + $modal.attr("id");
       if (!hash || hash === "#") return;
 
