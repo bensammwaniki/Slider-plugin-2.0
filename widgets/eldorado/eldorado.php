@@ -568,7 +568,8 @@ class Eldorado_Widget extends Widget_Base {
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
-                    '{{WRAPPER}} .daily-image-wrap' => 'height: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}}' => '--ds-eldorado-image-height: {{SIZE}}{{UNIT}};',
+                    '{{WRAPPER}} .daily-image-wrap' => 'height: var(--ds-eldorado-image-height, 300px); min-height: var(--ds-eldorado-image-height, 300px);',
                 ],
                 'default' => [
                     'size' => 300,
