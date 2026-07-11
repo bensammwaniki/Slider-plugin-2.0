@@ -1,4 +1,4 @@
-.ds-eldorado {
+:where(.ds-eldorado) {
   position: relative;
   --navigation-horizontal-spacing: -80px;
   --pagination-vertical-spacing: 70px;
