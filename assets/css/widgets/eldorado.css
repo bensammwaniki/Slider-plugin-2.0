@@ -250,6 +250,15 @@
   }
 }
 
+/* Keep the overlay visible while it is being edited in Elementor. */
+.elementor-editor-active .ds-eldorado .daily-avatar-content,
+.elementor-element-edit-mode .ds-eldorado .daily-avatar-content,
+.ds-eldorado-editor-mode .daily-avatar-content,
+.ds-eldorado-content-always .daily-avatar-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 @media (min-width: 1024px) {
   .ds-eldorado {
     .daily-nav-button {
