@@ -18,20 +18,6 @@
     .swiper-wrapper {
       transition-timing-function: linear !important;
     }
-    .swiper-slide {
-      width: auto !important;
-      flex: 0 0 auto !important;
-    }
-    .daily-slide-card {
-      width: auto !important;
-    }
-    .daily-image-wrap {
-      width: auto !important;
-      .daily-avatar {
-        width: auto !important;
-        height: 100% !important;
-      }
-    }
   }
 
   .swiper-slide {
@@ -110,7 +96,6 @@
   }
 
   .daily-image-wrap {
-    --ds-eldorado-image-height: 300px;
     border-radius: 6px;
     width: 100%;
     height: var(--ds-eldorado-image-height, 300px);

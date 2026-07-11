@@ -273,6 +273,15 @@ class Eldorado_Widget extends Widget_Base {
         );
 
         $this->add_control(
+            'carousel_layout_heading',
+            [
+                'label' => __('Layout', 'daily-slider'),
+                'type' => Controls_Manager::HEADING,
+                'separator' => 'before',
+            ]
+        );
+
+        $this->add_control(
             'swiper_effect',
             [
                 'label' => __('Effect', 'daily-slider'),
@@ -285,48 +294,56 @@ class Eldorado_Widget extends Widget_Base {
             ]
         );
 
-		$this->add_responsive_control(
-				'columns',
-				[
-					'label'          => __('Visible Columns', 'daily-slider'),
-				'type'           => Controls_Manager::SELECT,
-				'default'        => 3,
-				'tablet_default' => 2,
-				'mobile_default' => 1,
-				'options'        => [
-					1 => '1',
-					2 => '2',
-					3 => '3',
-					4 => '4',
-					5 => '5',
-					6 => '6',
-				],
-                // 'separator' => 'before',
-			]
-		);
+        $this->add_responsive_control(
+            'columns',
+            [
+                'label' => __('Visible Columns', 'daily-slider'),
+                'type' => Controls_Manager::SELECT,
+                'default' => 3,
+                'tablet_default' => 2,
+                'mobile_default' => 1,
+                'options' => [
+                    1 => '1',
+                    2 => '2',
+                    3 => '3',
+                    4 => '4',
+                    5 => '5',
+                    6 => '6',
+                ],
+            ]
+        );
 
-		$this->add_responsive_control(
-				'item_gap',
-				[
-					'label'   => __('Space Between Items', 'daily-slider'),
-				'type'    => Controls_Manager::SLIDER,
-				'default' => [
-					'size' => 20,
-				],
-				'tablet_default' => [
-					'size' => 20,
-				],
-				'mobile_default' => [
-					'size' => 20,
-				],
-				'range' => [
-					'px' => [
-						'min' => 0,
-						'max' => 100,
-					],
-				],
-			]
-		);
+        $this->add_responsive_control(
+            'item_gap',
+            [
+                'label' => __('Space Between Items', 'daily-slider'),
+                'type' => Controls_Manager::SLIDER,
+                'default' => [
+                    'size' => 20,
+                ],
+                'tablet_default' => [
+                    'size' => 20,
+                ],
+                'mobile_default' => [
+                    'size' => 20,
+                ],
+                'range' => [
+                    'px' => [
+                        'min' => 0,
+                        'max' => 100,
+                    ],
+                ],
+            ]
+        );
+
+        $this->add_control(
+            'carousel_playback_heading',
+            [
+                'label' => __('Playback', 'daily-slider'),
+                'type' => Controls_Manager::HEADING,
+                'separator' => 'before',
+            ]
+        );
 
         $this->add_control(
             'smooth_scroll',
@@ -422,6 +439,9 @@ class Eldorado_Widget extends Widget_Base {
                 'label_off' => __('No', 'daily-slider'),
                 'return_value' => 'yes',
                 'default' => 'yes',
+                'condition' => [
+                    'swiper_autoplay' => 'yes',
+                ],
             ]
         );
     
@@ -433,6 +453,9 @@ class Eldorado_Widget extends Widget_Base {
                 'label_on' => __('Yes', 'daily-slider'),
                 'label_off' => __('No', 'daily-slider'),
                 'default' => 'yes',
+                'condition' => [
+                    'smooth_scroll!' => 'yes',
+                ],
             ]
         );
 
@@ -456,6 +479,15 @@ class Eldorado_Widget extends Widget_Base {
                 'condition' => [
                     'smooth_scroll!' => 'yes',
                 ],
+            ]
+        );
+
+        $this->add_control(
+            'carousel_controls_heading',
+            [
+                'label' => __('Controls', 'daily-slider'),
+                'type' => Controls_Manager::HEADING,
+                'separator' => 'before',
             ]
         );
 
@@ -564,12 +596,11 @@ class Eldorado_Widget extends Widget_Base {
         $this->add_responsive_control(
             'avatar_image_size',
             [
-                'label' => __('Size', 'daily-slider'),
+                'label' => __('Image Height', 'daily-slider'),
                 'type' => Controls_Manager::SLIDER,
                 'size_units' => ['px', 'em', '%'],
                 'selectors' => [
                     '{{WRAPPER}}' => '--ds-eldorado-image-height: {{SIZE}}{{UNIT}};',
-                    '{{WRAPPER}} .daily-image-wrap' => 'height: var(--ds-eldorado-image-height, 300px); min-height: var(--ds-eldorado-image-height, 300px);',
                 ],
                 'default' => [
                     'size' => 300,

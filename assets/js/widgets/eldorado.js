@@ -60,10 +60,16 @@
       resizeObserver.disconnect();
     }
 
+    var windowResizeHandler = $container.data("dsEldoradoWindowResizeHandler");
+    if (windowResizeHandler) {
+      window.removeEventListener("resize", windowResizeHandler);
+    }
+
     $container.removeData("dsEldoradoSwiper");
     $container.removeData("dsEldoradoInited");
     $container.removeData("dsEldoradoSettingsSignature");
     $container.removeData("dsEldoradoResizeObserver");
+    $container.removeData("dsEldoradoWindowResizeHandler");
   }
 
   function getLayoutSignature($container, settings) {
@@ -73,6 +79,10 @@
 
   function getUsableWidth($container) {
     return $container[0] ? Math.round($container[0].getBoundingClientRect().width) : 0;
+  }
+
+  function getViewportWidth() {
+    return window.innerWidth || document.documentElement.clientWidth || 0;
   }
 
   async function waitForUsableWidth($container, maxAttempts, delay) {
@@ -168,12 +178,22 @@
       if (nextWidth === previousWidth) return;
 
       previousWidth = nextWidth;
-      applySlideLayout($container, $carousel.data("settings"), nextWidth);
-      applyResponsiveParamsToSwiper(swiper, $carousel.data("settings"), nextWidth);
+      var viewportWidth = getViewportWidth();
+      applySlideLayout($container, $carousel.data("settings"), viewportWidth);
+      applyResponsiveParamsToSwiper(swiper, $carousel.data("settings"), viewportWidth);
     });
 
     observer.observe($container[0]);
     $container.data("dsEldoradoResizeObserver", observer);
+
+    var windowResizeHandler = function () {
+      var viewportWidth = getViewportWidth();
+      applySlideLayout($container, $carousel.data("settings"), viewportWidth);
+      applyResponsiveParamsToSwiper(swiper, $carousel.data("settings"), viewportWidth);
+    };
+
+    window.addEventListener("resize", windowResizeHandler);
+    $container.data("dsEldoradoWindowResizeHandler", windowResizeHandler);
   }
 
   function buildSwiperSettings($carousel, rawSettings, width) {
@@ -251,7 +271,8 @@
           return;
         }
 
-        var settings = buildSwiperSettings($carousel, $carousel.data("settings"), width);
+        var viewportWidth = getViewportWidth();
+        var settings = buildSwiperSettings($carousel, $carousel.data("settings"), viewportWidth);
         if (!settings) {
           $container.data("dsEldoradoInited", false);
           return;
@@ -270,7 +291,7 @@
         $container.data("dsEldoradoSettingsSignature", settingsSignature);
 
         try {
-          applySlideLayout($container, $carousel.data("settings"), width);
+          applySlideLayout($container, $carousel.data("settings"), viewportWidth);
           var swiper = await createSwiperInstance($container[0], settings);
           $container.data("dsEldoradoSwiper", swiper);
           attachResizeObserver($carousel, $container, swiper);
