@@ -251,7 +251,7 @@ class Skyboot_Portfolio_Elementor_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Bulk Gallery Categories', 'skyboot-pg' ),
 				'type'        => Controls_Manager::TEXT,
 				'default'     => '',
-				'description' => esc_html__( 'Optional categories applied to all bulk-selected images. Separate multiple values with commas.', 'skyboot-pg' ),
+				'description' => esc_html__( 'Categories will be assigned to images whose Alt Text contains the category name. Separate multiple values with commas.', 'skyboot-pg' ),
 				'label_block' => true,
 				'condition'   => array(
 					'bulk_gallery_items!' => array( '' ),
@@ -855,11 +855,20 @@ class Skyboot_Portfolio_Elementor_Widget extends Widget_Base {
 				$media_data['alt_text'] = $item_title;
 			}
 
+			$item_filters = array();
+			if ( ! empty( $bulk_filters ) ) {
+				foreach ( $bulk_filters as $slug => $label ) {
+					if ( ! empty( $media_data['alt_text'] ) && stripos( $media_data['alt_text'], $label ) !== false ) {
+						$item_filters[ $slug ] = $label;
+					}
+				}
+			}
+
 			$items[] = array(
 				'type'         => 'image',
 				'title'        => $item_title,
 				'description'  => $item_text,
-				'filters'      => $bulk_filters,
+				'filters'      => $item_filters,
 				'preview_url'  => $media_data['preview_url'],
 				'full_url'     => $media_data['full_url'],
 				'alt_text'     => $media_data['alt_text'],
