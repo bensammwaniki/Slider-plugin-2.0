@@ -404,10 +404,13 @@ class Pixel_Widget extends Widget_Base {
             'swiper_autoplay',
             [
                 'label' => __('Autoplay', 'daily-slider'),
-                'type' => Controls_Manager::SWITCHER,
-                'label_on' => __('Yes', 'daily-slider'),
-                'label_off' => __('No', 'daily-slider'),
-                'default' => 'yes',
+                'type' => Controls_Manager::SELECT,
+                'default' => '',
+                'options' => [
+                    '' => __('Default', 'daily-slider'),
+                    'yes' => __('Yes', 'daily-slider'),
+                    'no' => __('No', 'daily-slider'),
+                ],
             ]
         );
     
@@ -441,10 +444,13 @@ class Pixel_Widget extends Widget_Base {
             'swiper_loop',
             [
                 'label' => __('Infinite loop', 'daily-slider'),
-                'type' => Controls_Manager::SWITCHER,
-                'label_on' => __('Yes', 'daily-slider'),
-                'label_off' => __('No', 'daily-slider'),
-                'default' => 'yes',
+                'type' => Controls_Manager::SELECT,
+                'default' => '',
+                'options' => [
+                    '' => __('Default', 'daily-slider'),
+                    'yes' => __('Yes', 'daily-slider'),
+                    'no' => __('No', 'daily-slider'),
+                ],
             ]
         );
     
@@ -477,10 +483,13 @@ class Pixel_Widget extends Widget_Base {
             'swiper_navigation',
             [
                 'label' => __('Navigation', 'daily-slider'),
-                'type' => Controls_Manager::SWITCHER,
-                'label_on' => __('Yes', 'daily-slider'),
-                'label_off' => __('No', 'daily-slider'),
-                'default' => 'yes',
+                'type' => Controls_Manager::SELECT,
+                'default' => '',
+                'options' => [
+                    '' => __('Default', 'daily-slider'),
+                    'yes' => __('Yes', 'daily-slider'),
+                    'no' => __('No', 'daily-slider'),
+                ],
             ]
         );
 
@@ -488,10 +497,13 @@ class Pixel_Widget extends Widget_Base {
             'swiper_pagination',
             [
                 'label' => __('Pagination', 'daily-slider'),
-                'type' => Controls_Manager::SWITCHER,
-                'label_on' => __('Yes', 'daily-slider'),
-                'label_off' => __('No', 'daily-slider'),
-                'default' => 'yes',
+                'type' => Controls_Manager::SELECT,
+                'default' => '',
+                'options' => [
+                    '' => __('Default', 'daily-slider'),
+                    'yes' => __('Yes', 'daily-slider'),
+                    'no' => __('No', 'daily-slider'),
+                ],
             ]
         );
     
@@ -1544,13 +1556,13 @@ $this->end_controls_section();// Close sub_title_style_section
             ];
             $device_key = $map[$device] ?? $key;
 
-            if (array_key_exists($device_key, $settings)) {
-                return !empty($settings[$device_key]) && $settings[$device_key] === 'yes';
+            if (isset($settings[$device_key]) && $settings[$device_key] !== '') {
+                return $settings[$device_key] === 'yes';
             }
 
-            // If device-specific key isn't present, fall back to desktop.
-            if ($device !== 'desktop' && array_key_exists($key, $settings)) {
-                return !empty($settings[$key]) && $settings[$key] === 'yes';
+            // If device-specific key isn't present or is empty (inheriting), fall back to desktop.
+            if ($device !== 'desktop' && isset($settings[$key]) && $settings[$key] !== '') {
+                return $settings[$key] === 'yes';
             }
 
             return null;

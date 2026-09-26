@@ -253,16 +253,18 @@
    RESPONSIVE NAV VISIBILITY
 ========================================= */
 
-.ds-pixel-slider.nav-off-desktop .daily-nav-button-wrap,
-.ds-pixel-slider.nav-off-desktop .daily-nav-button {
-  display: none !important;
+@media (min-width: 1025px) {
+  .ds-pixel-slider.nav-off-desktop .daily-nav-button-wrap,
+  .ds-pixel-slider.nav-off-desktop .daily-nav-button {
+    display: none !important;
+  }
+
+  .ds-pixel-slider.pag-off-desktop .daily-pagination {
+    display: none !important;
+  }
 }
 
-.ds-pixel-slider.pag-off-desktop .daily-pagination {
-  display: none !important;
-}
-
-@media (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1024px) {
   .ds-pixel-slider.nav-off-tablet .daily-nav-button-wrap,
   .ds-pixel-slider.nav-off-tablet .daily-nav-button {
     display: none !important;
