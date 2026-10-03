@@ -113,12 +113,25 @@ class ReviewCarousel_Widget extends Widget_Base {
         );
 
         $this->add_control(
+            'google_fallback_static',
+            [
+                'label'       => __( 'Fallback to Static Reviews on Error', 'daily-slider' ),
+                'type'        => Controls_Manager::SWITCHER,
+                'label_on'    => __( 'Yes', 'daily-slider' ),
+                'label_off'   => __( 'No', 'daily-slider' ),
+                'return_value' => 'yes',
+                'default'     => 'yes',
+                'description' => __( 'If Google Reviews cannot be loaded, display static repeater reviews so your page layout is never empty.', 'daily-slider' ),
+                'condition'   => [ 'data_source' => 'google' ],
+            ]
+        );
+
+        $this->add_control(
             'google_cache_notice',
             [
                 'type'            => Controls_Manager::RAW_HTML,
                 'raw'             => '<div style="background:#f0f6ff;border-left:3px solid #4A90E2;padding:8px 10px;font-size:12px;line-height:1.5;">'.
-                                     '<strong>⏱ Cache:</strong> Reviews are cached for <strong>6 hours</strong> to avoid unnecessary API calls. '.
-                                     'Re-save the page to force a refresh if the transient has expired.</div>',
+                                     '<strong>⏱ Cache:</strong> Reviews are cached for <strong>6 hours</strong> in production. In the Elementor editor, live previews bypass cache for instant testing.</div>',
                 'content_classes' => 'elementor-descriptor',
                 'condition'       => [ 'data_source' => 'google' ],
             ]
@@ -1557,29 +1570,45 @@ class ReviewCarousel_Widget extends Widget_Base {
             $place_id   = trim( $settings['google_place_id'] ?? '' );
             $limit      = (int) ( $settings['google_limit'] ?? 5 );
             $min_rating = (int) ( $settings['google_min_rating'] ?? 4 );
+            $fallback   = ! empty( $settings['google_fallback_static'] ) && 'yes' === $settings['google_fallback_static'];
 
             if ( empty( $api_key ) || empty( $place_id ) ) {
                 if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
-                    echo '<div style="padding:20px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:13px;">'.
-                         '<strong>⚠️ Google Reviews:</strong> Please enter your <em>API Key</em> and <em>Place ID or CID</em> in the widget settings to load reviews.</div>';
+                    echo '<div style="padding:15px 20px;background:#fff3cd;border:1px solid #ffc107;color:#856404;border-radius:8px;font-size:13px;margin-bottom:15px;line-height:1.5;">'.
+                         '<strong>⚠️ Google Reviews Setup:</strong> Please enter your <em>Google Places API Key</em> and <em>Place ID or CID</em> in the widget settings.</div>';
                 }
-                return;
-            }
-
-            $slides_data = \DailySlider_Google_Reviews_Bridge::get_reviews(
-                $place_id,
-                $api_key,
-                $limit,
-                $min_rating
-            );
-
-            if ( empty( $slides_data ) ) {
-                if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
-                    echo '<div style="padding:20px;background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;font-size:13px;">'.
-                         '<strong>⚠️ Google Reviews:</strong> No reviews found matching your filters (min rating: ' . (int) $min_rating . '★). '.
-                         'Check your API Key, Place ID or CID, and make sure the Places API is enabled.</div>';
+                if ( $fallback ) {
+                    $slides_data = $settings['swiper_slides'] ?? [];
+                } else {
+                    return;
                 }
-                return;
+            } else {
+                $slides_data = \DailySlider_Google_Reviews_Bridge::get_reviews(
+                    $place_id,
+                    $api_key,
+                    $limit,
+                    $min_rating
+                );
+
+                if ( empty( $slides_data ) ) {
+                    $err_msg = \DailySlider_Google_Reviews_Bridge::$last_error;
+                    if ( empty( $err_msg ) ) {
+                        $err_msg = 'No reviews found matching your filters (min rating: ' . (int) $min_rating . '★). Check your API Key, Place ID or CID, and make sure the Places API is enabled.';
+                    }
+
+                    if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
+                        echo '<div style="padding:15px 20px;background:#f8d7da;border:1px solid #f5c6cb;color:#721c24;border-radius:8px;font-size:13px;margin-bottom:15px;line-height:1.5;">'.
+                             '<strong>⚠️ Google Reviews Diagnostic:</strong> ' . esc_html( $err_msg ) .
+                             ( $fallback ? '<br><em style="font-size:12px;opacity:0.85;margin-top:4px;display:inline-block;">(Displaying fallback static reviews below so your layout remains visible)</em>' : '' ) .
+                             '</div>';
+                    }
+
+                    if ( $fallback ) {
+                        $slides_data = $settings['swiper_slides'] ?? [];
+                    } else {
+                        return;
+                    }
+                }
             }
         } else {
             // Static repeater mode — original behaviour.

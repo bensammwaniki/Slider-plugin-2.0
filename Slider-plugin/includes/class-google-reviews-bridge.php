@@ -26,6 +26,19 @@ class DailySlider_Google_Reviews_Bridge {
     const CACHE_TTL = 6 * HOUR_IN_SECONDS;
 
     /**
+     * Long-term Backup Transient TTL: 30 days.
+     * Used as a resilient fallback if the live API request fails or is unavailable.
+     */
+    const BACKUP_CACHE_TTL = 30 * DAY_IN_SECONDS;
+
+    /**
+     * Diagnostic properties for detailed error reporting.
+     */
+    public static $last_error  = '';
+    public static $last_status = '';
+    public static $raw_count   = 0;
+
+    /**
      * Fetch, filter, and return normalised Google reviews.
      *
      * Returns an array of items matching the ReviewCarousel repeater shape:
@@ -47,31 +60,50 @@ class DailySlider_Google_Reviews_Bridge {
      * @return array
      */
     public static function get_reviews( $place_id, $api_key, $limit = 5, $min_rating = 4 ) {
+        self::$last_error  = '';
+        self::$last_status = '';
+        self::$raw_count   = 0;
+
         // Validate required params.
         if ( empty( $place_id ) || empty( $api_key ) ) {
+            self::$last_error = 'API Key or Place ID is missing.';
             return [];
         }
 
         $resolved = self::resolve_identifier( $place_id );
-        if ( ! $resolved ) {
+        if ( ! $resolved || empty( $resolved['value'] ) ) {
+            self::$last_error = 'Could not resolve Place ID or CID from the input string.';
             return [];
         }
 
         $limit      = max( 1, min( 5, (int) $limit ) );
         $min_rating = max( 1, min( 5, (int) $min_rating ) );
 
-        // Build a transient key unique to this combination using the normalized identifier.
-        $cache_key = 'ds_gr_' . md5( $resolved['value'] . '_' . $limit . '_' . $min_rating );
-        $cached    = get_transient( $cache_key );
+        // Build unique cache keys for primary (6h) and backup (30d) transients.
+        $hash       = md5( $resolved['value'] . '_' . $limit . '_' . $min_rating );
+        $cache_key  = 'ds_gr_' . $hash;
+        $backup_key = 'ds_gr_bk_' . $hash;
 
-        if ( false !== $cached ) {
-            return $cached;
+        // In Elementor edit mode, bypass primary cache to ensure live preview updates when editing settings.
+        $is_edit_mode = class_exists( '\Elementor\Plugin' ) && \Elementor\Plugin::$instance->editor && \Elementor\Plugin::$instance->editor->is_edit_mode();
+        if ( ! $is_edit_mode ) {
+            $cached = get_transient( $cache_key );
+            if ( false !== $cached && is_array( $cached ) && ! empty( $cached ) ) {
+                return $cached;
+            }
         }
 
-        // Fetch from Google Places API.
+        // Fetch live from Google Places API.
         $raw = self::fetch_from_api( $resolved, $api_key );
 
         if ( empty( $raw ) ) {
+            // Live fetch failed or returned empty. Check if we have a last-known-good backup cache!
+            $backup = get_transient( $backup_key );
+            if ( false !== $backup && is_array( $backup ) && ! empty( $backup ) ) {
+                $orig_error = self::$last_error;
+                self::$last_error = ( $orig_error ? $orig_error . ' ' : '' ) . '[Resilience Fallback] Serving last known cached reviews.';
+                return $backup;
+            }
             return [];
         }
 
@@ -79,6 +111,17 @@ class DailySlider_Google_Reviews_Bridge {
         $filtered = array_filter( $raw, static function ( $review ) use ( $min_rating ) {
             return isset( $review['rating'] ) && (int) $review['rating'] >= $min_rating;
         } );
+
+        if ( empty( $filtered ) ) {
+            // No reviews passed the min_rating filter. Check backup cache before failing!
+            $backup = get_transient( $backup_key );
+            if ( false !== $backup && is_array( $backup ) && ! empty( $backup ) ) {
+                self::$last_error = 'Google returned ' . count( $raw ) . ' review(s), but 0 matched your Minimum Star Rating (' . $min_rating . '★). Serving last known cached reviews.';
+                return $backup;
+            }
+            self::$last_error = 'Google returned ' . count( $raw ) . ' review(s), but 0 reviews matched your Minimum Star Rating (' . $min_rating . '★). Try setting Minimum Star Rating to 1★.';
+            return [];
+        }
 
         // Sort: highest rating first, then most recent.
         usort( $filtered, static function ( $a, $b ) {
@@ -94,8 +137,11 @@ class DailySlider_Google_Reviews_Bridge {
         // Normalise to ReviewCarousel_Widget repeater shape.
         $normalised = array_map( [ __CLASS__, 'normalise_review' ], $filtered );
 
-        // Cache the result.
-        set_transient( $cache_key, $normalised, self::CACHE_TTL );
+        // Cache the result in both Primary (6h) and Long-term Backup (30d) transients!
+        if ( ! empty( $normalised ) ) {
+            set_transient( $cache_key, $normalised, self::CACHE_TTL );
+            set_transient( $backup_key, $normalised, self::BACKUP_CACHE_TTL );
+        }
 
         return $normalised;
     }
@@ -103,22 +149,27 @@ class DailySlider_Google_Reviews_Bridge {
     /**
      * Make the HTTP request to Google Places API and return raw review objects.
      *
-     * @param string $place_id Google Place ID.
+     * @param array  $resolved Normalized identifier array.
      * @param string $api_key  Google Places API key.
      *
      * @return array Raw review objects from the API, or [] on failure.
      */
     private static function fetch_from_api( $resolved, $api_key ) {
+        $lang = substr( get_locale(), 0, 2 );
+        if ( empty( $lang ) ) {
+            $lang = 'en';
+        }
+
         $query_params = [
-            'fields'   => 'reviews',
-            'language' => get_locale(),
+            'fields'   => 'name,rating,reviews,user_ratings_total',
+            'language' => $lang,
             'key'      => $api_key,
         ];
 
         if ( isset( $resolved['type'] ) && 'cid' === $resolved['type'] ) {
-            $query_params['cid'] = rawurlencode( $resolved['value'] );
+            $query_params['cid'] = $resolved['value'];
         } else {
-            $query_params['place_id'] = rawurlencode( $resolved['value'] );
+            $query_params['place_id'] = $resolved['value'];
         }
 
         $url = add_query_arg( $query_params, self::API_ENDPOINT );
@@ -126,7 +177,7 @@ class DailySlider_Google_Reviews_Bridge {
         $response = wp_remote_get(
             $url,
             [
-                'timeout'   => 10,
+                'timeout'   => 12,
                 'sslverify' => true,
                 'headers'   => [
                     'Accept' => 'application/json',
@@ -135,7 +186,8 @@ class DailySlider_Google_Reviews_Bridge {
         );
 
         if ( is_wp_error( $response ) ) {
-            // Log in debug mode so the developer can see what went wrong.
+            self::$last_status = 'HTTP_ERROR';
+            self::$last_error  = 'Network/HTTP Error: ' . $response->get_error_message();
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions
                 error_log( '[DailySlider Google Reviews] API request failed: ' . $response->get_error_message() );
@@ -144,16 +196,48 @@ class DailySlider_Google_Reviews_Bridge {
         }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
+        $status = $body['status'] ?? 'UNKNOWN';
+        $error_msg = $body['error_message'] ?? '';
+        self::$last_status = $status;
 
-        if ( empty( $body['result']['reviews'] ) || ! is_array( $body['result']['reviews'] ) ) {
-            if ( defined( 'WP_DEBUG' ) && WP_DEBUG && isset( $body['status'] ) && 'OK' !== $body['status'] ) {
+        if ( 'OK' !== $status ) {
+            switch ( $status ) {
+                case 'REQUEST_DENIED':
+                    self::$last_error = 'Google Places API Error (REQUEST_DENIED): ' . ( $error_msg ? $error_msg : 'The provided API key is invalid or Places API is not enabled in Google Cloud Console.' );
+                    break;
+                case 'INVALID_REQUEST':
+                    self::$last_error = 'Google Places API Error (INVALID_REQUEST): ' . ( $error_msg ? $error_msg : 'Missing or invalid Place ID or CID parameter.' );
+                    break;
+                case 'NOT_FOUND':
+                    self::$last_error = 'Google Places API Error (NOT_FOUND): ' . ( $error_msg ? $error_msg : 'The specified Place ID or CID was not found by Google.' );
+                    break;
+                case 'OVER_QUERY_LIMIT':
+                    self::$last_error = 'Google Places API Error (OVER_QUERY_LIMIT): Quota exceeded or billing not enabled on your Google Cloud account.';
+                    break;
+                case 'ZERO_RESULTS':
+                    self::$last_error = 'Google Places API returned ZERO_RESULTS for this Place ID or CID.';
+                    break;
+                default:
+                    self::$last_error = 'Google Places API Error (' . esc_html( $status ) . '): ' . esc_html( $error_msg );
+                    break;
+            }
+
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions
-                error_log( '[DailySlider Google Reviews] API status: ' . esc_html( $body['status'] ) );
+                error_log( '[DailySlider Google Reviews] API error status: ' . $status . ' - ' . $error_msg );
             }
             return [];
         }
 
-        return $body['result']['reviews'];
+        $reviews = $body['result']['reviews'] ?? [];
+        if ( empty( $reviews ) || ! is_array( $reviews ) ) {
+            self::$raw_count  = 0;
+            self::$last_error = 'Google Places API returned 0 reviews for this place. Note: Google Place Details API provides up to 5 of the most helpful reviews.';
+            return [];
+        }
+
+        self::$raw_count = count( $reviews );
+        return $reviews;
     }
 
     /**
@@ -207,8 +291,9 @@ class DailySlider_Google_Reviews_Bridge {
 
         foreach ( $limits as $limit ) {
             foreach ( $ratings as $min_rating ) {
-                $cache_key = 'ds_gr_' . md5( $resolved['value'] . '_' . $limit . '_' . $min_rating );
-                delete_transient( $cache_key );
+                $hash = md5( $resolved['value'] . '_' . $limit . '_' . $min_rating );
+                delete_transient( 'ds_gr_' . $hash );
+                delete_transient( 'ds_gr_bk_' . $hash );
             }
         }
     }
